@@ -1,0 +1,55 @@
+<div class="dashboard-wrapper">
+
+  <aside class="sidebar">
+    <div class="profile-box">
+      <img src="assets/img/Agricultor.png" alt="Usuario" class="avatar">
+    </div>
+
+    <nav class="navigation">
+
+    <a routerLink="/menu" routerLinkActive="active-link">
+     <img src="assets/img/IconHome.png" alt="Inicio">
+        Inicio
+      </a>
+
+      <a routerLink="/ingresos" routerLinkActive="active-link">
+        <img src="assets/img/IconActividades.png" alt="Ingresos">
+        Ingresos
+      </a>
+
+      <a routerLink="/egresos" routerLinkActive="active-link">
+        <img src="assets/img/IconEgresos.png" alt="Egresos">
+        Egresos
+      </a>
+
+      <a routerLink="/actividades" routerLinkActive="active-link">
+        <img src="assets/img/IconActividades.png" alt="Actividades">
+        Actividades
+      </a>
+    </nav>
+  </aside>
+
+  <div class="main-layout">
+
+    <header class="header">
+      <div class="logo-area">
+        <img src="assets/img/LogoVector.png" alt="KontAgro">
+      </div>
+      <button class="logout-btn" (click)="logout()">
+        <img src="assets/img/IconCerrarSesion.png" alt="Cerrar sesión">
+        Cerrar sesión
+      </button>
+    </header>
+    <main class="content-body">
+      <router-outlet></router-outlet>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-info">
+        <p>&copy; 2026 Kontagro - Tecnología para el Agro. Todos los derechos reservados.</p>
+        <span>KontAgro v1.0</span>
+      </div>
+    </footer>
+
+  </div>
+</div>

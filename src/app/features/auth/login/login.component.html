@@ -1,0 +1,32 @@
+<div class="login-container">
+  <header class="main-header">
+    <div class="logo">
+      <img src="assets/img/LogoVector.png" alt="Kontagro Logo">
+    </div>
+  </header>
+
+  <main class="login-main">
+    <div class="glass-card">
+      <h3>¡Bienvenido a la gestión de tus cultivos!</h3>
+      
+      <form (ngSubmit)="onLogin()">
+        <div class="input-group">
+          <label>Usuario</label>
+          <input type="text" [(ngModel)]="credenciales.usuario" name="usuario" placeholder="Ej: chimpabroly123">
+        </div>
+
+        <div class="input-group">
+          <label>Contraseña</label>
+          <input type="password" [(ngModel)]="credenciales.contrasena" name="contrasena" placeholder="********">
+        </div>
+
+        <button type="submit" class="btn-login">Iniciar Sesión</button>
+      </form>
+    </div>
+  </main>
+
+  <footer class="main-footer">
+    <p>&copy; 2026 Kontagro - Tecnología para el Agro. Todos los derechos reservados.</p>
+  </footer>
+
+</div>

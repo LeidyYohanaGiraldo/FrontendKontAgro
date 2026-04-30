@@ -1,0 +1,104 @@
+// Variables de marca
+$color-principal: #006600;
+$color-fondo-formulario: #ccffcc63;
+$color-texto: #003300;
+$color-fondo-input: #CCCCCC;
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  .main-header {
+    background: white;
+    padding: 0rem 1rem;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+    z-index: 2;
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: bold;
+      font-size: 1.2rem;
+      img { height: 40px; }
+    }
+  }
+
+  .login-main {
+    flex: 1; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    
+    background: url('/assets/img/ImgFondoLogin.png') no-repeat center center;
+    background-size: cover;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    .glass-card {
+      position: relative; 
+      background: $color-fondo-formulario;
+      backdrop-filter: blur(8px); 
+      padding: 3rem;
+      border-radius: 24px;
+      width: 20%;
+      max-width: 300px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      text-align: center;
+
+      h3 { color: $color-principal; margin-bottom: 0.5rem; }
+      p { color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
+
+    
+      .input-group input,
+      .btn-login {
+        width: 100%;
+        padding: 0.8rem;
+        font-size: 1rem;
+        box-sizing: border-box;
+      }
+
+      .input-group {
+        text-align: left;
+        margin-bottom: 1.5rem;
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: $color-texto; }
+        input {
+          border: 1px solid #ddd;
+           border-radius: 12px;
+          transition: border 0.3s;
+          background: $color-fondo-input;
+          &:focus { outline: none; border-color:  #ddd; }
+        }
+      }
+
+      .btn-login {
+      
+        background: $color-principal;
+        color: white;
+        border: none;
+        border-radius: 35px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform 0.2s;
+        &:hover { background: lighten($color-principal, 5%); transform: translateY(-2px); }
+      }
+    }
+  }
+  .main-footer {
+    background: #f8f9fa;
+    padding: 0rem 2rem;
+    display: flex;
+    justify-content:  center; 
+    align-items: center;
+    font-size: 0.85rem;
+    color: #777;
+  }
+}
