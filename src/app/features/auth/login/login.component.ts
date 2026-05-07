@@ -30,8 +30,8 @@ export class LoginComponent {
         // Se guarda el token que generó Java en el navegador
         localStorage.setItem('token', response.token);
 
-        //this.router.navigate(['/menu']);
-        alert('Login exitoso');
+        this.router.navigate(['/menu']);
+        //alert('Login exitoso');
       },
       error: (err) => {
         console.error('Error en el login', err);

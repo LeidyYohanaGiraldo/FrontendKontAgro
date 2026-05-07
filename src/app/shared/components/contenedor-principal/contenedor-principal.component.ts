@@ -1,6 +1,9 @@
-import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import { Component, inject, OnInit } from '@angular/core';
+import localeEs from '@angular/common/locales/es';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+
+registerLocaleData(localeEs);
 
 @Component({
   selector: 'app-contenedor-principal',
@@ -9,23 +12,21 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
   templateUrl: './contenedor-principal.component.html',
   styleUrl: './contenedor-principal.component.scss'
 })
-export class ContenedorPrincipalComponent {
+
+export class ContenedorPrincipalComponent implements OnInit {
   
+  private router = inject(Router);
+
   public fechaActual: Date = new Date();
 
-  constructor(private router: Router) { }
-
   ngOnInit(): void {
-   
     setInterval(() => {
       this.fechaActual = new Date();
     }, 1000);
   }
 
   logout(): void {
-    
-    console.log('Cerrando sesión en KontAgro...');
-    
+    console.log('Cerrando sesión en KontAgro...'); 
     this.router.navigate(['/login']);
   }
 

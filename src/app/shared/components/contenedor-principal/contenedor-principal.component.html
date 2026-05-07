@@ -7,8 +7,8 @@
 
     <nav class="navigation">
 
-    <a routerLink="/menu" routerLinkActive="active-link">
-     <img src="assets/img/IconHome.png" alt="Inicio">
+      <a routerLink="/menu" routerLinkActive="active-link">
+        <img src="assets/img/IconHome.png" alt="Inicio">
         Inicio
       </a>
 
@@ -46,6 +46,7 @@
 
     <footer class="footer">
       <div class="footer-info">
+        <span>{{ fechaActual | date: 'EEEE, d MMM. yyyy - HH:mm:ss' : '' : 'es-ES' }}</span>
         <p>&copy; 2026 Kontagro - Tecnología para el Agro. Todos los derechos reservados.</p>
         <span>KontAgro v1.0</span>
       </div>

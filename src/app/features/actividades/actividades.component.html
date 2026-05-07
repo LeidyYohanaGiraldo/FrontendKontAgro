@@ -1,1 +1,61 @@
-<p>actividades works!</p>
+<div class="actividades-container">
+  <!-- Sección del Formulario -->
+  <section class="form-section">
+    <div class="form-card">
+      <h2>{{ esEdicion ? 'Editar Actividad' : 'Nueva Actividad' }}</h2>
+      <div class="input-group">
+        <input 
+          type="text" 
+          [(ngModel)]="actividadSeleccionada.nombreActividad" 
+          placeholder="Digite el nombre de la actividad que desea guardar, Ej: Dellerva, Fertilización..."
+          (keyup.enter)="guardar()"
+        >
+        <div class="form-actions">
+          <button class="btn-save" (click)="guardar()">
+            {{ esEdicion ? 'Actualizar' : 'Guardar' }}
+          </button>
+          <button *ngIf="esEdicion" class="btn-cancel" (click)="limpiarFormulario()">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+<div class="stats">
+  <div class="card">
+    <p>Total</p>
+    <h3>{{ listaActividades.length }}</h3>
+  </div>
+</div>
+  <!-- Sección de la Tabla (Visor) -->
+  <section class="table-section">
+    <div class="table-container">
+      <table class="kontagro-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Descripción de la Actividad</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let act of listaActividades" [class.row-editing]="act.idActividad === actividadSeleccionada.idActividad">
+            <td class="col-id">{{ act.idActividad }}</td>
+            <td class="col-name">{{ act.nombreActividad }}</td>
+            <td class="col-actions">
+              <button class="btn-edit" (click)="prepararEdicion(act)">
+                <span>✏️</span>
+              </button>
+              <button class="btn-delete" (click)="eliminar(act.idActividad!)">
+                <span>🗑️</span>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="listaActividades.length === 0">
+            <td colspan="3" class="empty-message">No hay actividades registradas.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

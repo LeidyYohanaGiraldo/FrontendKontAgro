@@ -5,15 +5,18 @@ import { MenuComponent } from './features/menu/menu.component';
 import { IngresosComponent } from './features/ingresos/ingresos.component';
 import { EgresosComponent } from './features/egresos/egresos.component';
 import { ActividadesComponent } from './features/actividades/actividades.component';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
- 
-   { path: 'login', component: LoginComponent },
 
-// Ruta raíz que carga el contenedor y sus hijos
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
+
+  // Ruta raíz que carga el contenedor y sus hijos
   {
     path: '',
     component: ContenedorPrincipalComponent,
+    canActivate: [authGuard],// Protege acceso inicial al contenedor
     children: [
 
       { path: 'menu', component: MenuComponent },
