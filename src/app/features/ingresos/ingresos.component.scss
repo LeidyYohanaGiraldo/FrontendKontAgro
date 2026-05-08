@@ -1,0 +1,167 @@
+// Variables de marca
+$color-primario: #2e7d32;
+$color-primario-claro: #4caf50;
+$color-peligro: #cc0000;
+$color-fondo: #f9f9f9;
+$color-texto: #333;
+$color-blanco: #ffffff;
+$sombra-suave: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+.ingresos-container {
+  padding: 2rem;
+  background-color: $color-fondo;
+  min-height: 100vh;
+
+  // Sección Formulario
+  .form-section {
+    margin-bottom: 2rem;
+
+    .form-card {
+      background: $color-blanco;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: $sombra-suave;
+     
+
+      h2 {
+        color: $color-texto;
+        margin-bottom: 1.5rem;
+        font-size: 1.4rem;
+        font-weight: 600;
+      }
+
+      .grid-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+
+        .field {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+
+          label {
+            font-weight: 500;
+            color: $color-texto;
+            font-size: 0.9rem;
+          }
+
+          input, select {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+
+            &:focus {
+              outline: none;
+              border-color: $color-primario;
+            }
+          }
+        }
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+
+        button {
+          padding: 0.8rem 1.5rem;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
+          border: none;
+          transition: transform 0.2s, opacity 0.2s;
+
+          &:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+          }
+        }
+
+        .btn-save {
+          background-color: $color-primario;
+          color: $color-blanco;
+        }
+
+        .btn-cancel {
+          background-color: #f0f0f0;
+          color: $color-texto;
+        }
+      }
+    }
+  }
+
+  // Sección Tabla
+  .table-section {
+    .table-card {
+      background: $color-blanco;
+      border-radius: 12px;
+      box-shadow: $sombra-suave;
+      overflow: hidden;
+
+      .kontagro-table {
+        width: 100%;
+        border-collapse: collapse;
+
+        thead {
+          background-color: $color-primario;
+          color: $color-blanco;
+
+          th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 500;
+          }
+        }
+
+        tbody {
+          tr {
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+
+            &:hover {
+              background-color: rgba($color-primario, 0.03);
+            }
+
+            td {
+              padding: 1rem;
+              color: $color-texto;
+
+              &.text-success {
+                color: $color-primario;
+                font-weight: bold;
+              }
+            }
+          }
+        }
+      }
+
+      .col-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+
+        button {
+          background: none;
+          border: none;
+          font-size: 1.2rem;
+          cursor: pointer;
+          padding: 5px;
+          border-radius: 4px;
+
+          &:hover {
+            background-color: #f0f0f0;
+          }
+
+          &.btn-delete:hover {
+            color: $color-peligro;
+          }
+        }
+      }
+    }
+  }
+}
+.text-center { text-align: center; }

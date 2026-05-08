@@ -1,1 +1,65 @@
-<p>ingresos works!</p>
+<div class="ingresos-container">
+  <section class="form-section">
+    <div class="form-card">
+      <h2>{{ esEdicion ? 'Editar Ingreso' : 'Registrar Nuevo Ingreso' }}</h2>
+
+      <div class="grid-form">
+        <div class="field">
+          <label>Actividad vinculada</label>
+          <select [(ngModel)]="ingresoSeleccionado.idActividad">
+            <option [ngValue]="0" disabled>Seleccione una actividad</option>
+            <option *ngFor="let act of listaActividades" [value]="act.idActividad">
+              {{ act.nombreActividad }}
+            </option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Monto ($)</label>
+          <input type="number" [(ngModel)]="ingresoSeleccionado.valor" placeholder="0.00">
+        </div>
+
+        <div class="field">
+          <label>Fecha de ingreso</label>
+          <input type="date" [(ngModel)]="ingresoSeleccionado.fecha">
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-save" (click)="guardar()">
+          {{ esEdicion ? 'Actualizar' : 'Confirmar Ingreso' }}
+        </button>
+        <button *ngIf="esEdicion" class="btn-cancel" (click)="limpiarFormulario()">Cancelar</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="table-section">
+    <div class="table-card">
+      <table class="kontagro-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Actividad</th>
+            <th>Valor</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ing of listaIngresos">
+            <td>{{ ing.fecha | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <strong>
+                {{ obtenerNombreActividad(ing.idActividad) }}
+              </strong>
+            </td>
+            <td class="text-success">{{ ing.valor | currency:'USD' }}</td>
+            <td class="col-actions">
+              <button class="btn-edit" (click)="prepararEdicion(ing)">✏️</button>
+              <button class="btn-delete" (click)="eliminar(ing.id!)">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
