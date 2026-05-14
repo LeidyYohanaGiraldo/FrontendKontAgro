@@ -6,7 +6,7 @@ $color-fondo: #f9f9f9;
 .actividades-container {
   padding: 24px;
   display: grid;
-  grid-template-columns: 1fr 2fr; // 👈 clave
+  grid-template-columns: 1fr 2fr; 
   gap: 2rem;
 
   @media (max-width: 900px) {

@@ -52,7 +52,7 @@ export class IngresosComponent implements OnInit {
     };
   }
 
-  // El método guardar enviará el objeto tal cual lo espera tu @RequestBody IngresoDTO
+  // El método guardar enviará el objeto tal cual lo espera el @RequestBody IngresoDTO
   guardar() {
     if (this.esEdicion) {
       this._ingresoService.actualizar(this.ingresoSeleccionado).subscribe(() => {

@@ -2,16 +2,33 @@
   <!-- Sección del Formulario -->
   <section class="form-section">
     <div class="form-card">
-      <h2>{{ esEdicion ? 'Editar Actividad' : 'Nueva Actividad' }}</h2>
+      <h2>{{ esEdicion ? 'Editar Actividad' : 'Nueva Actividad' }}
+      </h2>
       <div class="input-group">
-        <input 
-          type="text" 
-          [(ngModel)]="actividadSeleccionada.nombreActividad" 
+        <input type="text" [(ngModel)]="actividadSeleccionada.nombreActividad"
           placeholder="Digite el nombre de la actividad que desea guardar, Ej: Dellerva, Fertilización..."
-          (keyup.enter)="guardar()"
-        >
+          (keyup.enter)="guardar()" (blur)="campoTocado = true">
+        <div
+          *ngIf="campoTocado && (!actividadSeleccionada.nombreActividad || actividadSeleccionada.nombreActividad.trim().length < 1)">
+          <small class="mensaje-error">
+            El nombre es obligatorio y debe tener mínimo 1 caracter
+          </small>
+        </div>
+        <div *ngIf="mensajeExito &&
+          actividadSeleccionada.nombreActividad &&
+          actividadSeleccionada.nombreActividad.trim().length >= 1">
+          <small class="mensaje-exito">
+            {{ mensajeExito }}
+          </small>
+        </div>
+        <div *ngIf="mensajeError">
+          <small class="mensaje-error">
+            {{ mensajeError }}
+          </small>
+        </div>
         <div class="form-actions">
-          <button class="btn-save" (click)="guardar()">
+          <button class="btn-save" (click)="guardar()"
+            [disabled]="!actividadSeleccionada.nombreActividad || actividadSeleccionada.nombreActividad.trim().length < 1">
             {{ esEdicion ? 'Actualizar' : 'Guardar' }}
           </button>
           <button *ngIf="esEdicion" class="btn-cancel" (click)="limpiarFormulario()">
@@ -21,12 +38,12 @@
       </div>
     </div>
   </section>
-<div class="stats">
-  <div class="card">
-    <p>Total</p>
-    <h3>{{ listaActividades.length }}</h3>
+  <div class="stats">
+    <div class="card">
+      <p>Total</p>
+      <h3>{{ listaActividades.length }}</h3>
+    </div>
   </div>
-</div>
   <!-- Sección de la Tabla (Visor) -->
   <section class="table-section">
     <div class="table-container">
@@ -39,7 +56,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let act of listaActividades" [class.row-editing]="act.idActividad === actividadSeleccionada.idActividad">
+          <tr *ngFor="let act of listaActividades"
+            [class.row-editing]="act.idActividad === actividadSeleccionada.idActividad">
             <td class="col-id">{{ act.idActividad }}</td>
             <td class="col-name">{{ act.nombreActividad }}</td>
             <td class="col-actions">

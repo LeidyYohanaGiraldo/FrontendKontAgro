@@ -19,6 +19,9 @@ export class ActividadesComponent implements OnInit {
   public listaActividades: Actividad[] = [];
   public actividadSeleccionada: Actividad = { nombreActividad: '' };
   public esEdicion: boolean = false;
+  public campoTocado: boolean = false;
+  public mensajeExito: string = '';
+  public mensajeError: string = '';
 
   ngOnInit(): void {
     this.obtenerTodas();
@@ -32,25 +35,53 @@ export class ActividadesComponent implements OnInit {
   }
 
   guardar(): void {
+    this.mensajeExito = '';
+    this.mensajeError = '';
+    this.campoTocado = true;
+    const nombre = this.actividadSeleccionada.nombreActividad?.trim();
+
+    if (!nombre || nombre.length < 1) {
+      this.mensajeError = 'El nombre es obligatorio';
+      this.mensajeExito = '';
+      return;
+    }
+    this.mensajeError = '';
+    this.actividadSeleccionada.nombreActividad = nombre;
+
     if (this.esEdicion) {
-      this._actividadService.actualizar(this.actividadSeleccionada).subscribe(() => {
-        this.limpiarFormulario();
-        this.obtenerTodas();
-      });
+      this._actividadService.actualizar(this.actividadSeleccionada)
+        .subscribe({
+          next: () => {
+            this.mensajeExito = 'Actividad actualizada correctamente';
+            this.limpiarFormulario();
+            this.obtenerTodas();
+          },
+          error: () => {
+            this.mensajeError = 'Error al actualizar la actividad';
+          }
+        });
+
     } else {
-      this._actividadService.crear(this.actividadSeleccionada).subscribe(() => {
-        this.limpiarFormulario();
-        this.obtenerTodas();
+      this._actividadService.crear(this.actividadSeleccionada).subscribe({
+        next: () => {
+          this.mensajeExito = 'Actividad creada exitosamente';
+          this.limpiarFormulario();
+          this.obtenerTodas();
+        },
+        error: () => {
+          this.mensajeError = 'Error al crear la actividad';
+        }
       });
     }
   }
+
   prepararEdicion(actividad: Actividad): void {
     // Usamos el operador spread (...) para crear una copia del objeto.
     // Así, si el usuario escribe en el input pero luego cancela, 
     // los datos originales de la tabla no se habrán modificado.
-    this.actividadSeleccionada = { ...actividad }; 
+    this.actividadSeleccionada = { ...actividad };
     this.esEdicion = true;
-  
+
   }
 
   eliminar(id: number): void {
@@ -62,5 +93,11 @@ export class ActividadesComponent implements OnInit {
   limpiarFormulario(): void {
     this.actividadSeleccionada = { nombreActividad: '' };
     this.esEdicion = false;
+    this.campoTocado = false;
+    this.mensajeError = '';
+
+    setTimeout(() => {
+      this.mensajeExito = '';
+    }, 6000);
   }
 }
