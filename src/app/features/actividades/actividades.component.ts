@@ -38,7 +38,7 @@ export class ActividadesComponent implements OnInit {
     this.mensajeExito = '';
     this.mensajeError = '';
     this.campoTocado = true;
-    const nombre = this.actividadSeleccionada.nombreActividad?.trim();
+    const nombre = this.actividadSeleccionada?.nombreActividad?.trim();
 
     if (!nombre || nombre.length < 1) {
       this.mensajeError = 'El nombre es obligatorio';

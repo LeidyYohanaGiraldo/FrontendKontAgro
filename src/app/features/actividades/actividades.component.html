@@ -7,30 +7,21 @@
       <div class="input-group">
         <input type="text" [(ngModel)]="actividadSeleccionada.nombreActividad"
           placeholder="Digite el nombre de la actividad que desea guardar, Ej: Dellerva, Fertilización..."
-          (keyup.enter)="guardar()" (blur)="campoTocado = true">
-        <div
-          *ngIf="campoTocado && (!actividadSeleccionada.nombreActividad || actividadSeleccionada.nombreActividad.trim().length < 1)">
-          <small class="mensaje-error">
-            El nombre es obligatorio y debe tener mínimo 1 caracter
-          </small>
+          (keyup.enter)="guardar()" (input)="mensajeError = ''">
+        <div *ngIf="mensajeError">
+            <small class="mensaje-error">
+                {{ mensajeError }}
+            </small>
         </div>
-        <div *ngIf="mensajeExito &&
-          actividadSeleccionada.nombreActividad &&
-          actividadSeleccionada.nombreActividad.trim().length >= 1">
+        <div *ngIf="mensajeExito">
           <small class="mensaje-exito">
             {{ mensajeExito }}
           </small>
         </div>
-        <div *ngIf="mensajeError">
-          <small class="mensaje-error">
-            {{ mensajeError }}
-          </small>
-        </div>
         <div class="form-actions">
-          <button class="btn-save" (click)="guardar()"
-            [disabled]="!actividadSeleccionada.nombreActividad || actividadSeleccionada.nombreActividad.trim().length < 1">
-            {{ esEdicion ? 'Actualizar' : 'Guardar' }}
-          </button>
+            <button class="btn-save" (click)="guardar()">
+              {{ esEdicion ? 'Actualizar' : 'Guardar' }}
+            </button>
           <button *ngIf="esEdicion" class="btn-cancel" (click)="limpiarFormulario()">
             Cancelar
           </button>

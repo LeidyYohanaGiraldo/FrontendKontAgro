@@ -22,6 +22,8 @@ export class EgresosComponent implements OnInit {
 
   public egresoSeleccionado: Egreso = this.initIngreso();
   public esEdicion = false;
+  public mensajeExito: string = '';
+  public mensajeError: string = '';
 
   ngOnInit(): void {
     this.cargarDatos();
@@ -50,30 +52,58 @@ export class EgresosComponent implements OnInit {
     };
   }
 
-  // El método guardar enviará el objeto tal cual lo espera el @RequestBody IngresoDTO
-  guardar() {
-    if (this.esEdicion) {
-      this._egresoService.actualizar(this.egresoSeleccionado).subscribe(() => {
-        this.cargarDatos();
-        this.limpiarFormulario();
-      });
-    } else {
-      this._egresoService.crear(this.egresoSeleccionado).subscribe(() => {
-        this.cargarDatos();
-        this.limpiarFormulario();
-      });
-    }
+  // El método guardar enviará el objeto tal cual lo espera el @RequestBody EgresoDTO
+guardar() {
+  this.mensajeError = '';
+  this.mensajeExito = '';
+
+  // Validaciones antes de enviar
+  if (this.egresoSeleccionado.idActividad === 0) {
+    this.mensajeError = 'Debe seleccionar una actividad vinculada';
+    return;
   }
+
+  if (!this.egresoSeleccionado.valor || this.egresoSeleccionado.valor <= 0) {
+    this.mensajeError = 'El monto debe ser mayor a 0';
+    return;
+  }
+
+  if (!this.egresoSeleccionado.fecha) {
+    this.mensajeError = 'La fecha de egreso es obligatoria';
+    return;
+  }
+
+  // Si pasa las validaciones, procedemos
+  const servicio = this.esEdicion 
+    ? this._egresoService.actualizar(this.egresoSeleccionado) 
+    : this._egresoService.crear(this.egresoSeleccionado);
+
+  servicio.subscribe({
+    next: () => {
+      this.mensajeExito = this.esEdicion ? 'Egreso actualizado correctamente' : 'Egreso registrado exitosamente';
+      this.cargarDatos();
+      this.limpiarFormulario();
+      
+      // El mensaje de éxito desaparece tras 5 segundos
+      setTimeout(() => this.mensajeExito = '', 5000);
+    },
+    error: (err) => {
+      this.mensajeError = 'Error al procesar el egreso en el servidor';
+      console.error(err);
+    }
+  });
+}
 
   prepararEdicion(egreso: Egreso) {
     this.egresoSeleccionado = { ...egreso };
     this.esEdicion = true;
   }
 
-  limpiarFormulario() {
-    this.egresoSeleccionado = this.initIngreso();
-    this.esEdicion = false;
-  }
+limpiarFormulario() {
+  this.egresoSeleccionado = this.initIngreso();
+  this.esEdicion = false;
+  this.mensajeError = '';
+}
 
   eliminar(id: number) {
     if (confirm('¿Eliminar este registro de egreso?')) {

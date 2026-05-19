@@ -3,6 +3,23 @@
     <div class="form-card">
       <h2>{{ esEdicion ? 'Editar Ingreso' : 'Registrar Nuevo Ingreso' }}</h2>
 
+      <div class="messages-container" style="margin-bottom: 15px;">
+  <div *ngIf="mensajeError">
+    <small class="mensaje-error" style="color: #dc3545; font-weight: bold; display: block;">
+      ⚠️ {{ mensajeError }}
+    </small>
+  </div>
+
+  <div *ngIf="mensajeExito">
+    <small class="mensaje-exito" style="color: #28a745; font-weight: bold; display: block;">
+      ✅ {{ mensajeExito }}
+    </small>
+  </div>
+</div>
+
+<div class="form-actions">
+  </div>
+
       <div class="grid-form">
         <div class="field">
           <label>Actividad vinculada</label>

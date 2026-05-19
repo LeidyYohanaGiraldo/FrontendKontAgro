@@ -22,6 +22,8 @@ export class IngresosComponent implements OnInit {
 
   public ingresoSeleccionado: Ingreso = this.initIngreso();
   public esEdicion = false;
+  public mensajeExito: string = '';
+  public mensajeError: string = '';
 
   ngOnInit(): void {
     this.cargarDatos();
@@ -53,29 +55,57 @@ export class IngresosComponent implements OnInit {
   }
 
   // El método guardar enviará el objeto tal cual lo espera el @RequestBody IngresoDTO
-  guardar() {
-    if (this.esEdicion) {
-      this._ingresoService.actualizar(this.ingresoSeleccionado).subscribe(() => {
-        this.cargarDatos();
-        this.limpiarFormulario();
-      });
-    } else {
-      this._ingresoService.crear(this.ingresoSeleccionado).subscribe(() => {
-        this.cargarDatos();
-        this.limpiarFormulario();
-      });
-    }
+guardar() {
+  this.mensajeError = '';
+  this.mensajeExito = '';
+
+  // VALIDACIONES
+  if (this.ingresoSeleccionado.idActividad === 0) {
+    this.mensajeError = 'Debe seleccionar una actividad vinculada';
+    return;
   }
+
+  if (!this.ingresoSeleccionado.valor || this.ingresoSeleccionado.valor <= 0) {
+    this.mensajeError = 'El monto debe ser mayor a 0';
+    return;
+  }
+
+  if (!this.ingresoSeleccionado.fecha) {
+    this.mensajeError = 'La fecha es obligatoria';
+    return;
+  }
+
+  // Si pasa las validaciones, ejecutamos la petición
+  const servicio = this.esEdicion 
+    ? this._ingresoService.actualizar(this.ingresoSeleccionado) 
+    : this._ingresoService.crear(this.ingresoSeleccionado);
+
+  servicio.subscribe({
+    next: () => {
+      this.mensajeExito = this.esEdicion ? 'Ingreso actualizado con éxito' : 'Ingreso registrado con éxito';
+      this.cargarDatos();
+      this.limpiarFormulario();
+      
+      // Borrar mensaje de éxito tras 5 segundos
+      setTimeout(() => this.mensajeExito = '', 5000);
+    },
+    error: (err) => {
+      this.mensajeError = 'Error al procesar la solicitud en el servidor';
+      console.error(err);
+    }
+  });
+}
 
   prepararEdicion(ingreso: Ingreso) {
     this.ingresoSeleccionado = { ...ingreso };
     this.esEdicion = true;
   }
 
-  limpiarFormulario() {
-    this.ingresoSeleccionado = this.initIngreso();
-    this.esEdicion = false;
-  }
+limpiarFormulario() {
+  this.ingresoSeleccionado = this.initIngreso();
+  this.esEdicion = false;
+  this.mensajeError = '';
+}
 
   eliminar(id: number) {
     if (confirm('¿Eliminar este registro de ingreso?')) {

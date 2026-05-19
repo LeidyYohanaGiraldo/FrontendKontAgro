@@ -137,3 +137,19 @@ $color-fondo: #f9f9f9;
   font-size: 1.2rem;
   color: $color-peligro;
 }
+
+.mensaje-error {
+    color: #ff0000; 
+    font-size: 0.85rem; 
+    margin-top: 5px;
+    display: block;
+    font-weight: 500; 
+}
+
+.mensaje-exito {
+    color: #28a745; 
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: block;
+    margin-top: 5px;
+}

@@ -3,6 +3,19 @@
     <div class="form-card">
       <h2>{{ esEdicion ? 'Editar Egreso' : 'Registrar Nuevo Egreso' }}</h2>
 
+      <div class="messages-container" style="margin-top: 10px; min-height: 25px;">
+      <div *ngIf="mensajeError">
+        <small class="mensaje-error" style="color: #dc3545; font-weight: bold;">
+          ⚠️ {{ mensajeError }}
+        </small>
+      </div>
+      <div *ngIf="mensajeExito">
+        <small class="mensaje-exito" style="color: #28a745; font-weight: bold;">
+          ✅ {{ mensajeExito }}
+        </small>
+      </div>
+      </div>
+
       <div class="grid-form">
         <div class="field">
           <label>Actividad vinculada</label>
