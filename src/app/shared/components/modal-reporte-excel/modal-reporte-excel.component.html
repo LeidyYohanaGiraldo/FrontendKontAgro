@@ -1,0 +1,27 @@
+<div class="overlay">
+
+  <div class="modal-container">
+
+    <h2>Generar Reporte Excel</h2>
+
+    <div class="field">
+      <label>Fecha Inicial</label>
+      <input type="date" [(ngModel)]="fechaInicial">
+    </div>
+
+    <div class="field">
+      <label>Fecha Final</label>
+      <input type="date" [(ngModel)]="fechaFinal">
+    </div>
+
+    <div class="acciones">
+      <button class="btn-generar" (click)="generarReporte()">
+        Generar
+      </button>
+
+      <button class="btn-cerrar" (click)="cerrarModal()">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>

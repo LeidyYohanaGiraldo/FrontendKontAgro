@@ -4,21 +4,21 @@
       <h2>{{ esEdicion ? 'Editar Ingreso' : 'Registrar Nuevo Ingreso' }}</h2>
 
       <div class="messages-container" style="margin-bottom: 15px;">
-  <div *ngIf="mensajeError">
-    <small class="mensaje-error" style="color: #dc3545; font-weight: bold; display: block;">
-      ⚠️ {{ mensajeError }}
-    </small>
-  </div>
+        <div *ngIf="mensajeError">
+          <small class="mensaje-error" style="color: #dc3545; font-weight: bold; display: block;">
+            ⚠️ {{ mensajeError }}
+          </small>
+        </div>
 
-  <div *ngIf="mensajeExito">
-    <small class="mensaje-exito" style="color: #28a745; font-weight: bold; display: block;">
-      ✅ {{ mensajeExito }}
-    </small>
-  </div>
-</div>
+        <div *ngIf="mensajeExito">
+          <small class="mensaje-exito" style="color: #28a745; font-weight: bold; display: block;">
+            ✅ {{ mensajeExito }}
+          </small>
+        </div>
+      </div>
 
-<div class="form-actions">
-  </div>
+      <div class="form-actions">
+      </div>
 
       <div class="grid-form">
         <div class="field">
@@ -49,7 +49,9 @@
       </div>
     </div>
   </section>
-
+<button class="btn-excel" (click)="abrirModalReporte()">
+  <img src="assets/img/logoExcel.png" class="excel-icon">
+</button>
   <section class="table-section">
     <div class="table-card">
       <table class="kontagro-table">
@@ -69,7 +71,7 @@
                 {{ obtenerNombreActividad(ing.idActividad) }}
               </strong>
             </td>
-            <td class="text-success">{{ ing.valor | currency:'USD' }}</td>
+            <td class="text-success">{{ ing.valor | currency:'COP':'symbol':'1.0-0' }}</td>
             <td class="col-actions">
               <button class="btn-edit" (click)="prepararEdicion(ing)">✏️</button>
               <button class="btn-delete" (click)="eliminar(ing.id!)">🗑️</button>
@@ -80,3 +82,8 @@
     </div>
   </section>
 </div>
+<app-modal-reporte-excel
+  *ngIf="mostrarModalReporte"
+  (cerrar)="cerrarModalReporte()"
+  (generar)="generarReporteExcel($event)">
+</app-modal-reporte-excel>

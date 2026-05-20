@@ -5,11 +5,12 @@ import { Ingreso } from './models/ingreso.model';
 import { Actividad } from '../actividades/models/actividad.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ModalReporteExcelComponent } from '../../shared/components/modal-reporte-excel/modal-reporte-excel.component';
 
 @Component({
   selector: 'app-ingresos',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ModalReporteExcelComponent],
   templateUrl: './ingresos.component.html',
   styleUrl: './ingresos.component.scss'
 })
@@ -24,6 +25,7 @@ export class IngresosComponent implements OnInit {
   public esEdicion = false;
   public mensajeExito: string = '';
   public mensajeError: string = '';
+  public mostrarModalReporte = false;
 
   ngOnInit(): void {
     this.cargarDatos();
@@ -55,57 +57,57 @@ export class IngresosComponent implements OnInit {
   }
 
   // El método guardar enviará el objeto tal cual lo espera el @RequestBody IngresoDTO
-guardar() {
-  this.mensajeError = '';
-  this.mensajeExito = '';
+  guardar() {
+    this.mensajeError = '';
+    this.mensajeExito = '';
 
-  // VALIDACIONES
-  if (this.ingresoSeleccionado.idActividad === 0) {
-    this.mensajeError = 'Debe seleccionar una actividad vinculada';
-    return;
-  }
-
-  if (!this.ingresoSeleccionado.valor || this.ingresoSeleccionado.valor <= 0) {
-    this.mensajeError = 'El monto debe ser mayor a 0';
-    return;
-  }
-
-  if (!this.ingresoSeleccionado.fecha) {
-    this.mensajeError = 'La fecha es obligatoria';
-    return;
-  }
-
-  // Si pasa las validaciones, ejecutamos la petición
-  const servicio = this.esEdicion 
-    ? this._ingresoService.actualizar(this.ingresoSeleccionado) 
-    : this._ingresoService.crear(this.ingresoSeleccionado);
-
-  servicio.subscribe({
-    next: () => {
-      this.mensajeExito = this.esEdicion ? 'Ingreso actualizado con éxito' : 'Ingreso registrado con éxito';
-      this.cargarDatos();
-      this.limpiarFormulario();
-      
-      // Borrar mensaje de éxito tras 5 segundos
-      setTimeout(() => this.mensajeExito = '', 5000);
-    },
-    error: (err) => {
-      this.mensajeError = 'Error al procesar la solicitud en el servidor';
-      console.error(err);
+    // VALIDACIONES
+    if (this.ingresoSeleccionado.idActividad === 0) {
+      this.mensajeError = 'Debe seleccionar una actividad vinculada';
+      return;
     }
-  });
-}
+
+    if (!this.ingresoSeleccionado.valor || this.ingresoSeleccionado.valor <= 0) {
+      this.mensajeError = 'El monto debe ser mayor a 0';
+      return;
+    }
+
+    if (!this.ingresoSeleccionado.fecha) {
+      this.mensajeError = 'La fecha es obligatoria';
+      return;
+    }
+
+    // Si pasa las validaciones, ejecutamos la petición
+    const servicio = this.esEdicion
+      ? this._ingresoService.actualizar(this.ingresoSeleccionado)
+      : this._ingresoService.crear(this.ingresoSeleccionado);
+
+    servicio.subscribe({
+      next: () => {
+        this.mensajeExito = this.esEdicion ? 'Ingreso actualizado con éxito' : 'Ingreso registrado con éxito';
+        this.cargarDatos();
+        this.limpiarFormulario();
+
+        // Borrar mensaje de éxito tras 5 segundos
+        setTimeout(() => this.mensajeExito = '', 5000);
+      },
+      error: (err) => {
+        this.mensajeError = 'Error al procesar la solicitud en el servidor';
+        console.error(err);
+      }
+    });
+  }
 
   prepararEdicion(ingreso: Ingreso) {
     this.ingresoSeleccionado = { ...ingreso };
     this.esEdicion = true;
   }
 
-limpiarFormulario() {
-  this.ingresoSeleccionado = this.initIngreso();
-  this.esEdicion = false;
-  this.mensajeError = '';
-}
+  limpiarFormulario() {
+    this.ingresoSeleccionado = this.initIngreso();
+    this.esEdicion = false;
+    this.mensajeError = '';
+  }
 
   eliminar(id: number) {
     if (confirm('¿Eliminar este registro de ingreso?')) {
@@ -113,9 +115,37 @@ limpiarFormulario() {
     }
   }
   obtenerNombreActividad(idActividad: number): string {
-  const actividad = this.listaActividades.find(
-    a => a.idActividad == idActividad
-  );
-  return actividad ? actividad.nombreActividad : '';
-}
+    const actividad = this.listaActividades.find(
+      a => a.idActividad == idActividad
+    );
+    return actividad ? actividad.nombreActividad : '';
+  }
+  abrirModalReporte() {
+    this.mostrarModalReporte = true;
+  }
+
+  cerrarModalReporte() {
+    this.mostrarModalReporte = false;
+  }
+
+  generarReporteExcel(event: any) {
+
+    this._ingresoService
+      .descargarReporte(event.fechaInicial, event.fechaFinal)
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'reporte_ingresos.xlsx';
+          a.click();
+          window.URL.revokeObjectURL(url);
+          this.cerrarModalReporte();
+        },
+
+        error: (err) => {
+          console.error(err);
+        }
+      });
+  }
 }

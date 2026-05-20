@@ -93,6 +93,25 @@ $sombra-suave: 0 4px 12px rgba(0, 0, 0, 0.08);
       }
     }
   }
+  .btn-excel {
+  color: rgba(255, 255, 255, 0.044);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  &:hover {
+    background: #145a326b;
+  }
+  .excel-icon {
+  width: 30px;
+  height: 35px;
+  margin-right: 8px;
+}
+}
 
   // Sección Tabla
   .table-section {
