@@ -11,8 +11,15 @@ export class IngresoService {
   private http = inject(HttpClient);
   private readonly URL_API = `${environment.apiUrl}/ingreso`;
 
-  listarTodos(): Observable<Ingreso[]> {
-    return this.http.get<Ingreso[]>(`${this.URL_API}/ingresos`);
+  listarTodos(page: number, size: number): Observable<any> {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('size', size);
+
+    return this.http.get<any>(
+      `${this.URL_API}/ingresos`,
+      { params }
+    );
   }
 
   crear(ingreso: Ingreso): Observable<Ingreso> {
@@ -31,7 +38,7 @@ export class IngresoService {
   //Generar reporte Excel
   descargarReporte(f1: string, f2: string): Observable<Blob> {
     const params = new HttpParams().set('fechaInicial', f1)
-    .set('fechaFinal', f2);
+      .set('fechaFinal', f2);
     return this.http.get(`${this.URL_API}/reporteExcel`, {
       params,
       responseType: 'blob'

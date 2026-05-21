@@ -26,6 +26,10 @@ export class IngresosComponent implements OnInit {
   public mensajeExito: string = '';
   public mensajeError: string = '';
   public mostrarModalReporte = false;
+  public paginaActual: number = 0;
+  public registrosPorPagina: number = 5;
+  public totalPaginas: number = 0;
+  public paginas: number[] = [];
 
   ngOnInit(): void {
     this.cargarDatos();
@@ -33,20 +37,37 @@ export class IngresosComponent implements OnInit {
 
   cargarDatos() {
     // Cargamos ingresos
-    // this._ingresoService.listarTodos().subscribe(data => this.listaIngresos = data);
     // Cargamos actividades para el select del formulario
-    //this._actividadService.listarTodas().subscribe(data => this.listaActividades = data);
-    this._ingresoService.listarTodos().subscribe(data => {
-      console.log("INGRESOS:", data);
-      this.listaIngresos = data;
-    });
+    
+    this._ingresoService
+      .listarTodos(this.paginaActual, this.registrosPorPagina)
+      .subscribe(data => {
+
+        console.log("INGRESOS:", data);
+        this.listaIngresos = data.content;
+        this.totalPaginas = data.totalPages;
+        this.generarPaginas();
+      });
 
     this._actividadService.listarTodas().subscribe(data => {
       console.log("ACTIVIDADES:", data);
       this.listaActividades = data;
     });
-
   }
+
+  generarPaginas(): void {
+  this.paginas = Array.from(
+    { length: this.totalPaginas },
+    (_, i) => i
+  );
+}
+
+  cambiarPagina(pagina: number) {
+  if (pagina >= 0 && pagina < this.totalPaginas) {
+    this.paginaActual = pagina;
+    this.cargarDatos();
+  }
+}
 
   initIngreso(): Ingreso {
     return {

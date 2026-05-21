@@ -24,6 +24,10 @@ export class EgresosComponent implements OnInit {
   public esEdicion = false;
   public mensajeExito: string = '';
   public mensajeError: string = '';
+  public paginaActual: number = 0;
+  public registrosPorPagina: number = 5;
+  public totalPaginas: number = 0;
+  public paginas: number[] = [];
 
   ngOnInit(): void {
     this.cargarDatos();
@@ -31,17 +35,33 @@ export class EgresosComponent implements OnInit {
 
   cargarDatos() {
     // Cargamos egresos
-    
-    this._egresoService.listarTodos().subscribe(data => {
-      console.log("EGRESOS:", data);
-      this.listaEgresos = data;
-    });
+
+    this._egresoService
+      .listarTodos(this.paginaActual, this.registrosPorPagina).subscribe(data => {
+        console.log("EGRESOS:", data);
+        this.listaEgresos = data.content;
+        this.totalPaginas = data.totalPages;
+        this.generarPaginas();
+      });
 
     this._actividadService.listarTodas().subscribe(data => {
       console.log("ACTIVIDADES:", data);
       this.listaActividades = data;
     });
+  }
 
+  generarPaginas(): void {
+    this.paginas = Array.from(
+      { length: this.totalPaginas },
+      (_, i) => i
+    );
+  }
+
+  cambiarPagina(pagina: number) {
+    if (pagina >= 0 && pagina < this.totalPaginas) {
+      this.paginaActual = pagina;
+      this.cargarDatos();
+    }
   }
 
   initIngreso(): Egreso {
@@ -53,57 +73,57 @@ export class EgresosComponent implements OnInit {
   }
 
   // El método guardar enviará el objeto tal cual lo espera el @RequestBody EgresoDTO
-guardar() {
-  this.mensajeError = '';
-  this.mensajeExito = '';
+  guardar() {
+    this.mensajeError = '';
+    this.mensajeExito = '';
 
-  // Validaciones antes de enviar
-  if (this.egresoSeleccionado.idActividad === 0) {
-    this.mensajeError = 'Debe seleccionar una actividad vinculada';
-    return;
-  }
-
-  if (!this.egresoSeleccionado.valor || this.egresoSeleccionado.valor <= 0) {
-    this.mensajeError = 'El monto debe ser mayor a 0';
-    return;
-  }
-
-  if (!this.egresoSeleccionado.fecha) {
-    this.mensajeError = 'La fecha de egreso es obligatoria';
-    return;
-  }
-
-  // Si pasa las validaciones, procedemos
-  const servicio = this.esEdicion 
-    ? this._egresoService.actualizar(this.egresoSeleccionado) 
-    : this._egresoService.crear(this.egresoSeleccionado);
-
-  servicio.subscribe({
-    next: () => {
-      this.mensajeExito = this.esEdicion ? 'Egreso actualizado correctamente' : 'Egreso registrado exitosamente';
-      this.cargarDatos();
-      this.limpiarFormulario();
-      
-      // El mensaje de éxito desaparece tras 5 segundos
-      setTimeout(() => this.mensajeExito = '', 5000);
-    },
-    error: (err) => {
-      this.mensajeError = 'Error al procesar el egreso en el servidor';
-      console.error(err);
+    // Validaciones antes de enviar
+    if (this.egresoSeleccionado.idActividad === 0) {
+      this.mensajeError = 'Debe seleccionar una actividad vinculada';
+      return;
     }
-  });
-}
+
+    if (!this.egresoSeleccionado.valor || this.egresoSeleccionado.valor <= 0) {
+      this.mensajeError = 'El monto debe ser mayor a 0';
+      return;
+    }
+
+    if (!this.egresoSeleccionado.fecha) {
+      this.mensajeError = 'La fecha de egreso es obligatoria';
+      return;
+    }
+
+    // Si pasa las validaciones, procedemos
+    const servicio = this.esEdicion
+      ? this._egresoService.actualizar(this.egresoSeleccionado)
+      : this._egresoService.crear(this.egresoSeleccionado);
+
+    servicio.subscribe({
+      next: () => {
+        this.mensajeExito = this.esEdicion ? 'Egreso actualizado correctamente' : 'Egreso registrado exitosamente';
+        this.cargarDatos();
+        this.limpiarFormulario();
+
+        // El mensaje de éxito desaparece tras 5 segundos
+        setTimeout(() => this.mensajeExito = '', 5000);
+      },
+      error: (err) => {
+        this.mensajeError = 'Error al procesar el egreso en el servidor';
+        console.error(err);
+      }
+    });
+  }
 
   prepararEdicion(egreso: Egreso) {
     this.egresoSeleccionado = { ...egreso };
     this.esEdicion = true;
   }
 
-limpiarFormulario() {
-  this.egresoSeleccionado = this.initIngreso();
-  this.esEdicion = false;
-  this.mensajeError = '';
-}
+  limpiarFormulario() {
+    this.egresoSeleccionado = this.initIngreso();
+    this.esEdicion = false;
+    this.mensajeError = '';
+  }
 
   eliminar(id: number) {
     if (confirm('¿Eliminar este registro de egreso?')) {

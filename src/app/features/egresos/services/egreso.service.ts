@@ -12,9 +12,16 @@ export class EgresoService {
 private http = inject(HttpClient);
   private readonly URL_API = `${environment.apiUrl}/egreso`;
 
-  listarTodos(): Observable<Egreso[]> {
-    return this.http.get<Egreso[]>(`${this.URL_API}/egresos`);
-  }
+  listarTodos(page: number, size: number): Observable<any> {
+  const params = new HttpParams()
+    .set('page', page)
+    .set('size', size);
+
+  return this.http.get<any>(
+    `${this.URL_API}/egresos`,
+    { params }
+  );
+}
 
   crear(egreso: Egreso): Observable<Egreso> {
     return this.http.post<Egreso>(this.URL_API, egreso);

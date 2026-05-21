@@ -164,4 +164,38 @@ $sombra-suave: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
   }
 }
+  .pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+
+  button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    background-color: #e0e0e0;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+
+    &:hover:not(:disabled) {
+      background-color: #2e7d32;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &.active {
+      background-color: #2e7d32;
+      color: white;
+    }
+  }
+}
 .text-center { text-align: center; }
