@@ -5,6 +5,7 @@ import { Egreso } from './models/egreso.model';
 import { Actividad } from '../actividades/models/actividad.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AlertService } from '../../shared/services/alert.service';
 
 @Component({
   selector: 'app-egresos',
@@ -16,14 +17,13 @@ import { FormsModule } from '@angular/forms';
 export class EgresosComponent implements OnInit {
   private _egresoService = inject(EgresoService);
   private _actividadService = inject(ActividadService);
+  private alertService = inject(AlertService);
 
   public listaEgresos: Egreso[] = [];
   public listaActividades: Actividad[] = [];
 
   public egresoSeleccionado: Egreso = this.initIngreso();
   public esEdicion = false;
-  public mensajeExito: string = '';
-  public mensajeError: string = '';
   public paginaActual: number = 0;
   public registrosPorPagina: number = 5;
   public totalPaginas: number = 0;
@@ -74,22 +74,24 @@ export class EgresosComponent implements OnInit {
 
   // El método guardar enviará el objeto tal cual lo espera el @RequestBody EgresoDTO
   guardar() {
-    this.mensajeError = '';
-    this.mensajeExito = '';
-
     // Validaciones antes de enviar
     if (this.egresoSeleccionado.idActividad === 0) {
-      this.mensajeError = 'Debe seleccionar una actividad vinculada';
+      this.alertService.warning(
+        'Debe seleccionar una actividad');
       return;
     }
 
     if (!this.egresoSeleccionado.valor || this.egresoSeleccionado.valor <= 0) {
-      this.mensajeError = 'El monto debe ser mayor a 0';
+      this.alertService.warning(
+        'El monto debe ser mayor a 0'
+      );
       return;
     }
 
     if (!this.egresoSeleccionado.fecha) {
-      this.mensajeError = 'La fecha de egreso es obligatoria';
+      this.alertService.warning(
+        'La fecha es obligatoria'
+      );
       return;
     }
 
@@ -100,16 +102,17 @@ export class EgresosComponent implements OnInit {
 
     servicio.subscribe({
       next: () => {
-        this.mensajeExito = this.esEdicion ? 'Egreso actualizado correctamente' : 'Egreso registrado exitosamente';
+        this.alertService.success(
+          this.esEdicion 
+          ? 'Egreso actualizado correctamente' 
+          : 'Egreso registrado exitosamente'
+        );  
         this.cargarDatos();
         this.limpiarFormulario();
-
-        // El mensaje de éxito desaparece tras 5 segundos
-        setTimeout(() => this.mensajeExito = '', 5000);
       },
       error: (err) => {
-        this.mensajeError = 'Error al procesar el egreso en el servidor';
         console.error(err);
+        
       }
     });
   }
@@ -122,12 +125,23 @@ export class EgresosComponent implements OnInit {
   limpiarFormulario() {
     this.egresoSeleccionado = this.initIngreso();
     this.esEdicion = false;
-    this.mensajeError = '';
   }
 
   eliminar(id: number) {
     if (confirm('¿Eliminar este registro de egreso?')) {
-      this._egresoService.eliminar(id).subscribe(() => this.cargarDatos());
+      this._egresoService.eliminar(id).subscribe({
+          next: () => {
+            this.alertService.success(
+              'Egreso eliminado correctamente'
+            );
+            this.cargarDatos();
+          },
+          error: () => {
+            this.alertService.error(
+              'No fue posible eliminar el ingreso'
+            );
+          }
+        });
     }
   }
   obtenerNombreActividad(idActividad: number): string {

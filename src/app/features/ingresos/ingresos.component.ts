@@ -6,6 +6,7 @@ import { Actividad } from '../actividades/models/actividad.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ModalReporteExcelComponent } from '../../shared/components/modal-reporte-excel/modal-reporte-excel.component';
+import { AlertService } from '../../shared/services/alert.service';
 
 @Component({
   selector: 'app-ingresos',
@@ -17,14 +18,13 @@ import { ModalReporteExcelComponent } from '../../shared/components/modal-report
 export class IngresosComponent implements OnInit {
   private _ingresoService = inject(IngresoService);
   private _actividadService = inject(ActividadService);
+  private alertService = inject(AlertService);
 
   public listaIngresos: Ingreso[] = [];
   public listaActividades: Actividad[] = [];
 
   public ingresoSeleccionado: Ingreso = this.initIngreso();
   public esEdicion = false;
-  public mensajeExito: string = '';
-  public mensajeError: string = '';
   public mostrarModalReporte = false;
   public paginaActual: number = 0;
   public registrosPorPagina: number = 5;
@@ -38,7 +38,7 @@ export class IngresosComponent implements OnInit {
   cargarDatos() {
     // Cargamos ingresos
     // Cargamos actividades para el select del formulario
-    
+
     this._ingresoService
       .listarTodos(this.paginaActual, this.registrosPorPagina)
       .subscribe(data => {
@@ -56,18 +56,18 @@ export class IngresosComponent implements OnInit {
   }
 
   generarPaginas(): void {
-  this.paginas = Array.from(
-    { length: this.totalPaginas },
-    (_, i) => i
-  );
-}
+    this.paginas = Array.from(
+      { length: this.totalPaginas },
+      (_, i) => i
+    );
+  }
 
   cambiarPagina(pagina: number) {
-  if (pagina >= 0 && pagina < this.totalPaginas) {
-    this.paginaActual = pagina;
-    this.cargarDatos();
+    if (pagina >= 0 && pagina < this.totalPaginas) {
+      this.paginaActual = pagina;
+      this.cargarDatos();
+    }
   }
-}
 
   initIngreso(): Ingreso {
     return {
@@ -79,22 +79,25 @@ export class IngresosComponent implements OnInit {
 
   // El método guardar enviará el objeto tal cual lo espera el @RequestBody IngresoDTO
   guardar() {
-    this.mensajeError = '';
-    this.mensajeExito = '';
-
     // VALIDACIONES
     if (this.ingresoSeleccionado.idActividad === 0) {
-      this.mensajeError = 'Debe seleccionar una actividad vinculada';
+      this.alertService.warning(
+        'Debe seleccionar una actividad');
       return;
     }
 
     if (!this.ingresoSeleccionado.valor || this.ingresoSeleccionado.valor <= 0) {
-      this.mensajeError = 'El monto debe ser mayor a 0';
+      this.alertService.warning(
+        'El monto debe ser mayor a 0'
+      );
+
       return;
     }
 
     if (!this.ingresoSeleccionado.fecha) {
-      this.mensajeError = 'La fecha es obligatoria';
+      this.alertService.warning(
+        'La fecha es obligatoria'
+      );
       return;
     }
 
@@ -105,16 +108,20 @@ export class IngresosComponent implements OnInit {
 
     servicio.subscribe({
       next: () => {
-        this.mensajeExito = this.esEdicion ? 'Ingreso actualizado con éxito' : 'Ingreso registrado con éxito';
+        this.alertService.success(
+
+          this.esEdicion
+            ? 'Ingreso actualizado correctamente'
+            : 'Ingreso registrado correctamente'
+        );
         this.cargarDatos();
         this.limpiarFormulario();
-
-        // Borrar mensaje de éxito tras 5 segundos
-        setTimeout(() => this.mensajeExito = '', 5000);
       },
       error: (err) => {
-        this.mensajeError = 'Error al procesar la solicitud en el servidor';
         console.error(err);
+        this.alertService.error(
+          'Error al procesar la solicitud'
+        );
       }
     });
   }
@@ -127,20 +134,36 @@ export class IngresosComponent implements OnInit {
   limpiarFormulario() {
     this.ingresoSeleccionado = this.initIngreso();
     this.esEdicion = false;
-    this.mensajeError = '';
   }
 
   eliminar(id: number) {
     if (confirm('¿Eliminar este registro de ingreso?')) {
-      this._ingresoService.eliminar(id).subscribe(() => this.cargarDatos());
+      this._ingresoService
+        .eliminar(id)
+        .subscribe({
+          next: () => {
+            this.alertService.success(
+              'Ingreso eliminado correctamente'
+            );
+            this.cargarDatos();
+          },
+
+          error: () => {
+            this.alertService.error(
+              'No fue posible eliminar el ingreso'
+            );
+          }
+        });
     }
   }
+
   obtenerNombreActividad(idActividad: number): string {
     const actividad = this.listaActividades.find(
       a => a.idActividad == idActividad
     );
     return actividad ? actividad.nombreActividad : '';
   }
+
   abrirModalReporte() {
     this.mostrarModalReporte = true;
   }
@@ -150,7 +173,6 @@ export class IngresosComponent implements OnInit {
   }
 
   generarReporteExcel(event: any) {
-
     this._ingresoService
       .descargarReporte(event.fechaInicial, event.fechaFinal)
       .subscribe({
@@ -162,10 +184,15 @@ export class IngresosComponent implements OnInit {
           a.click();
           window.URL.revokeObjectURL(url);
           this.cerrarModalReporte();
+          this.alertService.success(
+            'Reporte descargado correctamente'
+          );
         },
-
         error: (err) => {
           console.error(err);
+          this.alertService.error(
+            'Error al descargar reporte'
+          );
         }
       });
   }
