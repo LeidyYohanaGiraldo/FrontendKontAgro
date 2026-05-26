@@ -7,17 +7,7 @@
       <div class="input-group">
         <input type="text" [(ngModel)]="actividadSeleccionada.nombreActividad"
           placeholder="Digite el nombre de la actividad que desea guardar, Ej: Dellerva, Fertilización..."
-          (keyup.enter)="guardar()" (input)="mensajeError = ''">
-        <div *ngIf="mensajeError">
-            <small class="mensaje-error">
-                {{ mensajeError }}
-            </small>
-        </div>
-        <div *ngIf="mensajeExito">
-          <small class="mensaje-exito">
-            {{ mensajeExito }}
-          </small>
-        </div>
+          (keyup.enter)="guardar()" >
         <div class="form-actions">
             <button class="btn-save" (click)="guardar()">
               {{ esEdicion ? 'Actualizar' : 'Guardar' }}
