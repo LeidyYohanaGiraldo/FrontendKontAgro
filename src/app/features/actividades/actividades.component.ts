@@ -4,6 +4,8 @@ import { Actividad } from './models/actividad.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AlertService } from '../../shared/services/alert.service';
+import { ActividadEconomicaService } from '../../core/services/actividad-economica/actividad-economica.service';
+import { ActividadEconomica } from '../../core/models/actividad-economica.model';
 
 @Component({
   selector: 'app-actividades',
@@ -16,107 +18,114 @@ export class ActividadesComponent implements OnInit {
   // Inyectamos el servicio que creamos con la URL global
   private _actividadService = inject(ActividadService);
   private alertService = inject(AlertService);
+  private actividadEconomicaService = inject(ActividadEconomicaService);
 
   // Variables para la vista
   public listaActividades: Actividad[] = [];
-  public actividadSeleccionada: Actividad = { nombreActividad: '' };
+
+  public actividadSeleccionada: Actividad = {
+    nombreActividad: '',
+    idActividadEconomica: undefined
+  };
   public esEdicion: boolean = false;
   public campoTocado: boolean = false;
 
+  //Lista para el combobox
+  public listaActividadesEconomicas: ActividadEconomica[] = [];
+
+  get nombreActividadInvalido(): boolean {
+    return !this.actividadSeleccionada.nombreActividad?.trim();
+  }
+
+  get actividadEconomicaInvalida(): boolean {
+    return !this.actividadSeleccionada.idActividadEconomica;
+  }
+
   ngOnInit(): void {
     this.obtenerTodas();
+    this.obtenerActividadesEconomicas();
   }
 
   obtenerTodas(): void {
-  this._actividadService.listarTodas().subscribe({
-    next: (data) => {
-      this.listaActividades = data;
-    },
+    this._actividadService.listarTodas().subscribe({
+      next: (data) => {
+        this.listaActividades = data;
+      },
+    });
+  }
+  obtenerActividadesEconomicas(): void {
+    this.actividadEconomicaService.listarTodas().subscribe({
+      next: (data) => {
+
+        console.log('DATA COMBO:', data);
+        this.listaActividadesEconomicas = data;
+      },
     error: (err) => {
-      console.error('Error al cargar actividades', err);
-      this.alertService.error('Error al cargar actividades');
+      console.error('ERROR COMBO:', err);
     }
-  });
-}
+    });
+  }
 
-guardar(): void {
-  this.campoTocado = true;
-  const nombre = this.actividadSeleccionada?.nombreActividad?.trim();
+  guardar(): void {
+    this.campoTocado = true;
 
-  if(!nombre || nombre.length < 1) {
-  this.alertService.warning(
-    'El nombre es obligatorio'
-  );
-  return;
-}
+    if (this.nombreActividadInvalido) {
+      this.alertService.warning('El nombre es obligatorio');
+      return;
+    }
 
-this.actividadSeleccionada.nombreActividad = nombre;
+    if (this.actividadEconomicaInvalida) {
+      this.alertService.warning('Debe seleccionar una actividad económica');
+      return;
+    }
 
-if (this.esEdicion) {
-  this._actividadService.actualizar(this.actividadSeleccionada)
-    .subscribe({
+    const request$ = this.esEdicion
+      ? this._actividadService.actualizar(this.actividadSeleccionada)
+      : this._actividadService.crear(this.actividadSeleccionada);
+
+    request$.subscribe({
       next: () => {
-        this.alertService.success(
-          'Actividad actualizada correctamente'
-        );
+
+        const mensaje = this.esEdicion
+          ? 'Actividad actualizada correctamente'
+          : 'Actividad creada exitosamente';
+
+        this.alertService.success(mensaje);
+
         this.limpiarFormulario();
         this.obtenerTodas();
-      },
-      error: () => {
-        this.alertService.error(
-          'Error al actualizar la actividad'
-        );
       }
     });
-
-} else {
-  this._actividadService.crear(this.actividadSeleccionada).subscribe({
-    next: () => {
-      this.alertService.success(
-        'Actividad creada exitosamente'
-      );
-      this.limpiarFormulario();
-      this.obtenerTodas();
-    },
-    error: () => {
-      this.alertService.error(
-        'Error al crear la actividad'
-      );
-    }
-  });
-}
   }
 
-prepararEdicion(actividad: Actividad): void {
-  // Usamos el operador spread (...) para crear una copia del objeto.
-  // Así, si el usuario escribe en el input pero luego cancela, 
-  // los datos originales de la tabla no se habrán modificado.
-  this.actividadSeleccionada = { ...actividad };
-  this.esEdicion = true;
-
-}
-
-eliminar(id: number): void {
-  if(confirm('¿Estás seguro de eliminar esta actividad?')) {
-  this._actividadService.eliminar(id).subscribe({
-    next: () => {
-      this.alertService.success(
-        'Actividad eliminada correctamente'
-      );
-      this.obtenerTodas();
-    },
-    error: () => {
-      this.alertService.error(
-        'No es posible eliminar la actividad porque tiene ingresos o egresos asociados'
-      );
-    }
-  });
-}
+  prepararEdicion(actividad: Actividad): void {
+    // Usamos el operador spread (...) para crear una copia del objeto.
+    // Así, si el usuario escribe en el input pero luego cancela, 
+    // los datos originales de la tabla no se habrán modificado.
+    this.actividadSeleccionada = { ...actividad };
+    this.esEdicion = true;
   }
 
-limpiarFormulario(): void {
-  this.actividadSeleccionada = { nombreActividad: '' };
-  this.esEdicion = false;
-  this.campoTocado = false;
-}
+  eliminar(id: number): void {
+    if (confirm('¿Estás seguro de eliminar esta actividad?')) {
+      this._actividadService.eliminar(id).subscribe({
+        next: () => {
+          this.alertService.success(
+            'Actividad eliminada correctamente'
+          );
+          this.obtenerTodas();
+        },
+      });
+    }
+  }
+
+  limpiarFormulario(): void {
+    this.actividadSeleccionada = {
+      nombreActividad: '',
+      idActividadEconomica: undefined
+    };
+
+    this.esEdicion = false;
+    this.campoTocado = false;
+  }
 }

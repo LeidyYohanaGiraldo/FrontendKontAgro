@@ -4,9 +4,10 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
-import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { authInterceptor } from './core/interceptors/auth/auth.interceptor';
 import { registerLocaleData } from '@angular/common';
 import localeEsCo from '@angular/common/locales/es-CO';
+import { errorInterceptor } from './core/interceptors/error/error.interceptor';
  
 registerLocaleData(localeEsCo);
 
@@ -14,7 +15,7 @@ export const appConfig: ApplicationConfig = {
   providers:
     [provideRouter(routes),
     provideHttpClient(
-      withInterceptors([authInterceptor])
+      withInterceptors([authInterceptor,errorInterceptor])
     ),
     { provide: LOCALE_ID, useValue: 'es-CO' }
       // provideClientHydration()

@@ -3,7 +3,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms'; 
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
 import { UsuarioDTO } from '../../../core/models/usuario.model';
 import { Router } from '@angular/router'
 
