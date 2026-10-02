@@ -1,0 +1,69 @@
+<div class="gestion-container">
+  <section class="form-section">
+    <div class="form-card">
+      <h2>{{ esEdicion ? 'Editar Trabajador' : 'Registrar Trabajador' }}</h2>
+
+      <div class="grid-form">
+        <div class="field">
+          <label for="nombreTrabajador">Nombre completo</label>
+          <input
+            id="nombreTrabajador"
+            type="text"
+            [(ngModel)]="trabajadorSeleccionado.nombre"
+            placeholder="Digite el nombre del trabajador"
+            (keyup.enter)="guardar()">
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-save" type="button" (click)="guardar()">
+          {{ esEdicion ? 'Actualizar' : 'Guardar' }}
+        </button>
+        <button *ngIf="esEdicion" class="btn-cancel" type="button" (click)="limpiarFormulario()">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="table-section">
+    <div class="table-card">
+      <table class="kontagro-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Trabajador</th>
+            <th class="col-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let trabajador of trabajadoresVisibles">
+            <td>{{ trabajador.id }}</td>
+            <td class="cell-truncated"><app-texto-truncado [texto]="trabajador.nombre"></app-texto-truncado></td>
+            <td class="col-actions">
+              <div class="action-group">
+                <button type="button" class="icon-button" title="Editar trabajador" (click)="prepararEdicion(trabajador)">
+                  <app-ui-icon name="edit"></app-ui-icon>
+                </button>
+                <button type="button" class="icon-button danger" title="Eliminar trabajador" (click)="eliminar(trabajador)">
+                  <app-ui-icon name="delete"></app-ui-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="listaTrabajadores.length === 0">
+            <td colspan="3" class="empty-message">No hay trabajadores registrados.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <app-paginacion
+    [paginaActual]="paginaActual"
+    [totalPaginas]="totalPaginas"
+    [totalRegistros]="listaTrabajadores.length"
+    [tamanoPagina]="registrosPorPagina"
+    (cambiar)="cambiarPagina($event)">
+  </app-paginacion>
+</div>

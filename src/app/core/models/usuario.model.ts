@@ -1,12 +1,13 @@
-
 export interface UsuarioDTO {
-  id?: number;          // El '?' significa que puede ser nulo (como un Long en Java)
-  usuario: string;      // En JS/TS se usa 'string' en minúscula
-  contrasena?: string; 
-  nombre?: string;
+  id?: number;
+  usuario: string;
+  contrasena?: string;
+  nombres?: string;
+  apellidos?: string;
 }
 
 export interface AuthResponseDTO {
   token: string;
-  usuario: UsuarioDTO;  // Aquí se usa la interfaz de arriba como tipo
+  usuario: UsuarioDTO;
+  tokenExpiresAt: number;
 }
