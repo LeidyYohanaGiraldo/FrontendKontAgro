@@ -1,0 +1,46 @@
+:host {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.texto-truncado {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  cursor: help;
+  border-radius: 4px;
+
+  &:focus-visible {
+    outline: 2px solid rgba(46, 125, 50, 0.28);
+    outline-offset: 2px;
+  }
+}
+
+.texto-principal {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.texto-truncado.expandido .texto-principal {
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.texto-detalle {
+  display: block;
+  margin-top: .35rem;
+  padding: .45rem .55rem;
+  border-radius: 6px;
+  background: #f7faf7;
+  color: #475467;
+  font-size: .78rem;
+  line-height: 1.4;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}

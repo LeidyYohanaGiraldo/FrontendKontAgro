@@ -1,0 +1,20 @@
+<div class="pagination">
+  <div class="pagination-info">
+    Mostrando
+    {{ registroInicial }}-{{ registroFinal }}
+    de
+    {{ totalRegistros }}
+    registros
+  </div>
+
+  <button (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 0">
+    ⬅ Anterior
+  </button>
+
+  <button *ngFor="let pagina of paginas" (click)="cambiarPagina(pagina)" [class.active]="paginaActual === pagina">
+    {{ pagina + 1 }}
+  </button>
+  <button (click)="cambiarPagina(paginaActual + 1)" [disabled]="totalPaginas === 0 || paginaActual >= totalPaginas - 1">
+    Siguiente ➡
+  </button>
+</div>

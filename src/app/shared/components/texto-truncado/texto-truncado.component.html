@@ -1,0 +1,15 @@
+<span
+  class="texto-truncado"
+  [class.expandido]="expandido"
+  tabindex="0"
+  [attr.title]="contenidoDetalle"
+  [attr.aria-expanded]="expandido"
+  (click)="alternar()"
+  (keydown)="manejarTeclado($event)">
+  <span class="texto-principal">{{ valor }}</span>
+  <span
+    *ngIf="expandido && contenidoDetalle !== valor"
+    class="texto-detalle">
+    {{ contenidoDetalle }}
+  </span>
+</span>

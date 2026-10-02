@@ -1,45 +1,70 @@
-<div class="dashboard-wrapper">
+<div class="dashboard-wrapper" [class.mobile-menu-open]="menuMovilAbierto">
+  <button
+    *ngIf="menuMovilAbierto"
+    type="button"
+    class="sidebar-backdrop"
+    aria-label="Cerrar menú de navegación"
+    (click)="cerrarMenuMovil()">
+  </button>
 
-  <aside class="sidebar">
+  <aside class="sidebar" id="mainSidebar">
     <div class="profile-box">
       <img src="assets/img/Agricultor.png" alt="Usuario" class="avatar">
     </div>
 
-    <nav class="navigation">
-
-      <a routerLink="/menu" routerLinkActive="active-link">
-        <img src="assets/img/IconHome.png" alt="Inicio">
-        Inicio
+    <nav class="navigation" aria-label="Navegación principal">
+      <a routerLink="/menu" routerLinkActive="active-link" (click)="cerrarMenuMovil()">
+        <app-ui-icon name="home"></app-ui-icon><span>Inicio</span>
       </a>
-
-      <a routerLink="/ingresos" routerLinkActive="active-link">
-        <img src="assets/img/IconActividades.png" alt="Ingresos">
-        Ingresos
+      <a routerLink="/ingresos" routerLinkActive="active-link" (click)="cerrarMenuMovil()">
+        <app-ui-icon name="income"></app-ui-icon><span>Ingresos</span>
       </a>
-
-      <a routerLink="/egresos" routerLinkActive="active-link">
-        <img src="assets/img/IconEgresos.png" alt="Egresos">
-        Egresos
+      <a routerLink="/egresos" routerLinkActive="active-link" (click)="cerrarMenuMovil()">
+        <app-ui-icon name="expense"></app-ui-icon><span>Egresos</span>
       </a>
-
-      <a routerLink="/actividades" routerLinkActive="active-link">
-        <img src="assets/img/IconActividades.png" alt="Actividades">
-        Actividades
+      <a routerLink="/actividades" routerLinkActive="active-link" (click)="cerrarMenuMovil()">
+        <app-ui-icon name="activities"></app-ui-icon><span>Actividades</span>
+      </a>
+      <a routerLink="/trabajadores" routerLinkActive="active-link" (click)="cerrarMenuMovil()">
+        <app-ui-icon name="workers"></app-ui-icon><span>Trabajadores</span>
+      </a>
+      <a routerLink="/tareas-realizadas" routerLinkActive="active-link" (click)="cerrarMenuMovil()">
+        <app-ui-icon name="tasks"></app-ui-icon><span>Tareas</span>
+      </a>
+      <a routerLink="/pagos-trabajadores" routerLinkActive="active-link" (click)="cerrarMenuMovil()">
+        <app-ui-icon name="payments"></app-ui-icon><span>Pagos</span>
+      </a>
+      <a routerLink="/liquidaciones-nomina" routerLinkActive="active-link" (click)="cerrarMenuMovil()">
+        <app-ui-icon name="payroll"></app-ui-icon><span>Nómina</span>
+      </a>
+      <a routerLink="/contabilidad" routerLinkActive="active-link" (click)="cerrarMenuMovil()">
+        <app-ui-icon name="accounting"></app-ui-icon><span>Contabilidad</span>
       </a>
     </nav>
   </aside>
 
   <div class="main-layout">
-
     <header class="header">
+      <button
+        type="button"
+        class="mobile-menu-btn"
+        aria-label="Abrir menú de navegación"
+        aria-controls="mainSidebar"
+        [attr.aria-expanded]="menuMovilAbierto"
+        (click)="alternarMenuMovil()">
+        <app-ui-icon name="menu"></app-ui-icon>
+      </button>
+
       <div class="logo-area">
         <img src="assets/img/LogoVector.png" alt="KontAgro">
       </div>
-      <button class="logout-btn" (click)="logout()">
-        <img src="assets/img/IconCerrarSesion.png" alt="Cerrar sesión">
-        Cerrar sesión
+
+      <button class="logout-btn" type="button" (click)="logout()">
+        <app-ui-icon name="logout"></app-ui-icon>
+        <span>Cerrar sesión</span>
       </button>
     </header>
+
     <main class="content-body">
       <router-outlet></router-outlet>
     </main>
@@ -47,10 +72,9 @@
     <footer class="footer">
       <div class="footer-info">
         <span>{{ fechaActual | date: 'EEEE, d MMM. yyyy - HH:mm:ss' : '' : 'es-ES' }}</span>
-        <p>&copy; 2026 Kontagro - Tecnología para el Agro. Todos los derechos reservados.</p>
+        <p>&copy; 2026 KontAgro - Tecnología para el Agro. Todos los derechos reservados.</p>
         <span>KontAgro v1.0</span>
       </div>
     </footer>
-
   </div>
 </div>

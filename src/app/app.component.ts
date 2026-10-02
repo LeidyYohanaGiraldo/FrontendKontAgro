@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { AlertComponent } from './shared/components/alert/alert.component';
+import { IdleSessionService } from './core/services/session/idle-session.service';
 
 @Component({
   selector: 'app-root',
@@ -12,4 +13,9 @@ import { AlertComponent } from './shared/components/alert/alert.component';
 })
 export class AppComponent {
   title = 'kontagro-frontend';
+  private readonly idleSession = inject(IdleSessionService);
+
+  constructor() {
+    this.idleSession.start();
+  }
 }

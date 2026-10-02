@@ -1,0 +1,296 @@
+@use 'hover' as hover;
+
+$color-primario: #2e7d32;
+$color-peligro: #b42318;
+$color-texto: #333;
+$color-secundario: #667085;
+$sombra-suave: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+.movimiento-container {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-card,
+.table-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: $sombra-suave;
+}
+
+.form-card {
+  padding: 1.5rem;
+}
+
+.section-heading {
+  margin-bottom: 1.5rem;
+
+  h2 {
+    margin: 0 0 0.35rem;
+    color: $color-texto;
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    color: $color-secundario;
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+}
+
+.grid-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  label {
+    color: $color-texto;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  input,
+  select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.8rem;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    background: #fff;
+    color: $color-texto;
+    font: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primario;
+      box-shadow: 0 0 0 3px rgba($color-primario, 0.1);
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+
+  button {
+    min-height: 42px;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+  }
+}
+
+.btn-save {
+  background: $color-primario;
+  color: #fff;
+}
+
+.btn-cancel {
+  background: #eee;
+  color: $color-texto;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-excel {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid #d0d5dd;
+  border-radius: 9px;
+  background: #fff;
+  color: $color-texto;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+
+  .excel-icon {
+    width: 25px;
+    height: 28px;
+    object-fit: contain;
+  }
+}
+
+.table-card {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.kontagro-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+
+  thead {
+    background: $color-primario;
+    color: #fff;
+  }
+
+  th,
+  td {
+    padding: 0.9rem 1rem;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  th {
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s ease;
+  }
+}
+
+.text-success {
+  color: $color-primario;
+  font-weight: 600;
+}
+
+.text-center,
+.col-actions {
+  text-align: center !important;
+}
+
+.action-group {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.icon-button {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: #475467;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+
+  app-ui-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.empty-message {
+  padding: 2rem !important;
+  text-align: center !important;
+  color: #777;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .form-actions button:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    @include hover.glow($color-primario);
+  }
+
+  .btn-excel:hover {
+    background: #eef8f0;
+    transform: translateY(-1px);
+    @include hover.glow($color-primario);
+  }
+
+  .kontagro-table tbody tr:hover {
+    background: rgba($color-primario, 0.04);
+  }
+
+  .icon-button:hover {
+    color: $color-primario;
+    background: #f0f8f1;
+    transform: translateY(-1px);
+    @include hover.glow($color-primario);
+  }
+
+  .icon-button.danger:hover {
+    color: $color-peligro;
+    background: #fff1f0;
+    @include hover.glow($color-peligro);
+  }
+}
+
+.form-actions button:active,
+.btn-excel:active,
+.icon-button:active {
+  transform: translateY(0);
+}
+
+.form-actions button:focus-visible,
+.btn-excel:focus-visible,
+.icon-button:focus-visible {
+  outline: 3px solid rgba($color-primario, 0.2);
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .grid-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .movimiento-container {
+    gap: 1rem;
+  }
+
+  .form-card {
+    padding: 1rem;
+  }
+
+  .grid-form {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .toolbar {
+    justify-content: stretch;
+  }
+
+  .btn-excel {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.field-help {
+  color: #667085;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}

@@ -1,0 +1,946 @@
+@use 'hover' as hover;
+
+$color-primario: #2e7d32;
+$color-peligro: #b42318;
+$color-fondo: #f9f9f9;
+$color-texto: #333;
+$color-texto-secundario: #667085;
+$color-blanco: #fff;
+$sombra-suave: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+/* =========================================================
+   CONTENEDOR GENERAL
+   ========================================================= */
+
+.gestion-container {
+  min-height: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* =========================================================
+   TARJETAS
+   ========================================================= */
+
+.form-card,
+.table-card {
+  max-width: 100%;
+  background: $color-blanco;
+  border-radius: 12px;
+  box-shadow: $sombra-suave;
+}
+
+.form-card {
+  padding: 1.5rem;
+
+  h2 {
+    margin: 0 0 1.5rem;
+    color: $color-texto;
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+}
+
+/* =========================================================
+   ENCABEZADOS
+   ========================================================= */
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  h2,
+  h3 {
+    margin: 0 0 0.35rem;
+    color: $color-texto;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+
+  h3 {
+    font-size: 1.05rem;
+  }
+
+  p {
+    margin: 0;
+    color: $color-texto-secundario;
+    line-height: 1.45;
+    font-size: 0.9rem;
+  }
+
+  &.standalone-heading {
+    margin-bottom: 0.8rem;
+  }
+}
+
+/* =========================================================
+   GRID PRINCIPAL DEL FORMULARIO
+   ========================================================= */
+
+.grid-form {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(210px, 100%), 1fr)
+  );
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.payroll-worker-grid {
+  grid-template-columns: minmax(0, 440px);
+}
+
+/*
+ * Los campos que deben ocupar toda la fila
+ * empiezan en la primera línea y terminan en la última.
+ *
+ * Esto es más robusto que "span 2" porque el grid
+ * puede tener diferente número de columnas según el ancho.
+ */
+.field-span-2 {
+  grid-column: 1 / -1;
+}
+
+/* =========================================================
+   CAMPOS GENERALES
+   ========================================================= */
+
+.field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  label {
+    color: $color-texto;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 0.8rem;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    background: $color-blanco;
+    color: $color-texto;
+    font: inherit;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primario;
+      box-shadow: 0 0 0 3px rgba($color-primario, 0.1);
+    }
+  }
+
+  textarea {
+    min-height: 76px;
+    resize: vertical;
+  }
+}
+
+/* =========================================================
+   BOTONES DEL FORMULARIO
+   ========================================================= */
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+
+  button {
+    min-height: 42px;
+    padding: 0.8rem 1.5rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+
+    transition:
+      transform 0.2s ease,
+      opacity 0.2s ease,
+      box-shadow 0.2s ease;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    &:focus-visible {
+      outline: 3px solid rgba($color-primario, 0.18);
+      outline-offset: 2px;
+    }
+  }
+}
+
+.btn-save {
+  background: $color-primario;
+  color: $color-blanco;
+}
+
+.btn-cancel {
+  background: #eee;
+  color: $color-texto;
+}
+
+/* =========================================================
+   TABLA
+   ========================================================= */
+
+.table-card {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.compact-table-card {
+  box-shadow: none;
+  border: 1px solid #eaecf0;
+}
+
+.kontagro-table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+
+  &.wide-table {
+    min-width: 1080px;
+  }
+
+  thead {
+    background: $color-primario;
+    color: $color-blanco;
+  }
+
+  th,
+  td {
+    padding: 0.9rem 1rem;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  th {
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.15s ease;
+
+    &.row-selected {
+      background: rgba($color-primario, 0.08);
+    }
+
+    &.row-disabled {
+      color: #98a2b3;
+      background: #fafafa;
+    }
+  }
+}
+
+/* =========================================================
+   SELECCIÓN DE TABLA
+   ========================================================= */
+
+.selection-column {
+  width: 48px;
+  text-align: center !important;
+
+  input[type='checkbox'] {
+    width: 18px;
+    height: 18px;
+    accent-color: $color-primario;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+}
+
+/* =========================================================
+   CELDAS DE TABLA
+   ========================================================= */
+
+.cell-observations {
+  min-width: 150px;
+  max-width: 260px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.cell-truncated {
+  min-width: 120px;
+  max-width: 220px;
+}
+
+.col-actions {
+  text-align: center !important;
+  white-space: nowrap;
+}
+
+.action-group {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+/* =========================================================
+   BOTONES DE ICONOS
+   ========================================================= */
+
+.icon-button {
+  width: 36px;
+  height: 36px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 7px;
+
+  background: transparent;
+  color: #475467;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+
+  app-ui-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba($color-primario, 0.18);
+    outline-offset: 2px;
+  }
+}
+
+/* =========================================================
+   ESTADOS VACÍOS
+   ========================================================= */
+
+.empty-message {
+  padding: 2rem !important;
+  text-align: center !important;
+  color: #777;
+}
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+
+.status-badge {
+  display: inline-block;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: #fff3cd;
+  color: #7a5a00;
+
+  &.paid {
+    background: #e8f5e9;
+    color: #1b5e20;
+  }
+
+  &.cancelled {
+    background: #f2f4f7;
+    color: #667085;
+  }
+}
+
+.text-success {
+  color: $color-primario;
+  font-weight: 600;
+}
+
+.text-warning {
+  color: #9a6700;
+  font-weight: 600;
+}
+
+/* =========================================================
+   PAGOS PENDIENTES
+   ========================================================= */
+
+.pending-payments {
+  margin-top: 0.5rem;
+
+  .subsection-title {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.8rem;
+
+    h3 {
+      margin: 0 0 0.25rem;
+      color: $color-texto;
+      font-size: 1.05rem;
+    }
+
+    p {
+      margin: 0;
+      color: $color-texto-secundario;
+      font-size: 0.87rem;
+    }
+  }
+}
+
+/* =========================================================
+   RESUMEN DE NÓMINA
+   ========================================================= */
+
+.payroll-summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(130px, 1fr));
+  gap: 0.8rem;
+  margin: 1.25rem 0;
+
+  .summary-item {
+    min-height: 74px;
+    padding: 0.9rem 1rem;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.35rem;
+
+    border: 1px solid #e4e7ec;
+    border-radius: 10px;
+
+    background: #fafafa;
+
+    span {
+      color: $color-texto-secundario;
+      font-size: 0.8rem;
+    }
+
+    strong {
+      color: $color-texto;
+      font-size: 1rem;
+    }
+
+    &.highlight {
+      border-color: #b7d9ba;
+      background: #edf7ee;
+
+      strong {
+        color: $color-primario;
+        font-size: 1.12rem;
+      }
+    }
+  }
+}
+
+/* =========================================================
+   DETALLE
+   ========================================================= */
+
+.detail-section {
+  margin-top: -0.5rem;
+}
+
+.detail-card {
+  padding-top: 0.4rem;
+}
+
+.detail-header {
+  padding: 1rem 1.2rem;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+
+  border-bottom: 1px solid #eaecf0;
+
+  h3 {
+    margin: 0 0 0.25rem;
+    color: $color-texto;
+    font-size: 1.05rem;
+  }
+
+  p {
+    margin: 0;
+    color: $color-texto-secundario;
+    font-size: 0.85rem;
+  }
+}
+
+/* =========================================================
+   JORNADAS DE TRABAJO
+   ========================================================= */
+
+.workdays-field {
+  gap: 0.8rem;
+}
+
+.workdays-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+
+  > div {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+}
+
+.field-help {
+  display: block;
+  color: $color-texto-secundario;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.selected-days-count {
+  flex: 0 0 auto;
+
+  padding: 0.35rem 0.65rem;
+
+  border: 1px solid #cfe8d2;
+  border-radius: 999px;
+
+  background: #edf7ee;
+  color: #14532d;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+/* =========================================================
+   DOS TARJETAS DE JORNADAS
+   ========================================================= */
+
+.workdays-selector {
+  display: grid;
+
+  /*
+   * Dos tarjetas de igual tamaño.
+   * minmax(0, 1fr) evita que el contenido
+   * fuerce el ancho de la columna.
+   */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 1rem;
+
+  width: 100%;
+  min-width: 0;
+}
+
+.workdays-option {
+  min-width: 0;
+  width: 100%;
+
+  padding: 0.9rem;
+
+  border: 1px solid #e4e7ec;
+  border-radius: 10px;
+
+  background: #fafafa;
+
+  box-sizing: border-box;
+}
+
+.workdays-option-title {
+  display: block;
+
+  margin-bottom: 0.75rem;
+
+  color: $color-texto;
+
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+/* =========================================================
+   AGREGAR UN DÍA
+   ========================================================= */
+
+.date-add-row {
+  display: grid;
+
+  /*
+   * Una sola columna.
+   * El input y el botón ocupan todo el ancho.
+   */
+  grid-template-columns: 1fr;
+
+  gap: 0.75rem;
+
+  width: 100%;
+  min-width: 0;
+}
+
+.date-add-row input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.date-add-row .btn-secondary {
+  width: 100%;
+}
+
+/* =========================================================
+   AGREGAR UN RANGO
+   ========================================================= */
+
+.date-range-row {
+  display: grid;
+
+  /*
+   * Desde
+   * Hasta
+   * Botón
+   *
+   * Todos ocupan el ancho completo.
+   */
+  grid-template-columns: 1fr;
+
+  gap: 0.75rem;
+
+  width: 100%;
+  min-width: 0;
+}
+
+.compact-date-field {
+  min-width: 0;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.compact-date-field label {
+  color: $color-texto-secundario;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.compact-date-field input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+
+  padding: 0.72rem;
+
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+
+  background: $color-blanco;
+  color: $color-texto;
+
+  font: inherit;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: $color-primario;
+    box-shadow: 0 0 0 3px rgba($color-primario, 0.1);
+  }
+}
+
+.date-range-row .btn-secondary {
+  width: 100%;
+}
+
+/* =========================================================
+   BOTÓN SECUNDARIO
+   ========================================================= */
+
+.btn-secondary {
+  min-height: 44px;
+
+  padding: 0.65rem 1rem;
+
+  border: 1px solid $color-primario;
+  border-radius: 9px;
+
+  background: $color-blanco;
+  color: #1b5e20;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  box-sizing: border-box;
+
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.btn-secondary:disabled,
+.date-chip button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* =========================================================
+   CHIPS DE FECHAS
+   ========================================================= */
+
+.date-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  margin-top: 0.75rem;
+}
+
+.date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+
+  padding: 0.42rem 0.65rem;
+
+  border: 1px solid #cfe8d2;
+  border-radius: 999px;
+
+  background: #edf7ee;
+  color: #14532d;
+
+  font-size: 0.86rem;
+  font-weight: 600;
+
+  button {
+    border: 0;
+    background: transparent;
+    color: inherit;
+
+    font: inherit;
+    cursor: pointer;
+    line-height: 1;
+  }
+}
+
+/* =========================================================
+   TABLA DE PAGOS
+   ========================================================= */
+
+.payments-table {
+  .cell-truncated {
+    width: 180px;
+    max-width: 220px;
+  }
+
+  .days-cell {
+    width: 120px;
+    max-width: 150px;
+  }
+
+  .cell-observations {
+    width: 190px;
+    max-width: 220px;
+  }
+}
+
+/* =========================================================
+   HOVER
+   ========================================================= */
+
+@media (hover: hover) and (pointer: fine) {
+
+  .form-actions button:hover:not(:disabled) {
+    opacity: 1;
+    transform: translateY(-1px);
+
+    @include hover.glow($color-primario);
+  }
+
+  .kontagro-table tbody tr:hover {
+    background: rgba($color-primario, 0.03);
+  }
+
+  .icon-button:hover:not(:disabled) {
+    color: $color-primario;
+    background: #f0f8f1;
+
+    transform: translateY(-1px);
+
+    @include hover.glow($color-primario);
+  }
+
+  .icon-button.danger:hover:not(:disabled) {
+    color: $color-peligro;
+    background: #fff1f0;
+
+    @include hover.glow($color-peligro);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: #f0f8f1;
+
+    box-shadow:
+      0 0 0 1px rgba(46, 125, 50, 0.22),
+      0 0 12px rgba(46, 125, 50, 0.24);
+  }
+}
+
+/* =========================================================
+   ACTIVE / PRESIONADO
+   ========================================================= */
+
+.form-actions button:active,
+.icon-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* =========================================================
+   TABLET / PANTALLAS MEDIANAS
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+  .payroll-summary {
+    grid-template-columns: repeat(
+      2,
+      minmax(160px, 1fr)
+    );
+  }
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  /*
+   * Las tarjetas de jornadas pasan a una sola columna.
+   */
+  .workdays-selector {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   MÓVIL
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .gestion-container {
+    gap: 1rem;
+  }
+
+  .form-card {
+    padding: 1rem;
+  }
+
+  .section-heading {
+    margin-bottom: 1.1rem;
+    flex-direction: column;
+  }
+
+  /*
+   * IMPORTANTE:
+   * No poner .field-span-2 { grid-column: auto; }
+   *
+   * Se conserva 1 / -1.
+   */
+
+  .form-actions {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .payroll-worker-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .payroll-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .pending-payments .subsection-title,
+  .detail-header {
+    flex-direction: column;
+  }
+
+  .detail-header .icon-button {
+    align-self: flex-end;
+  }
+
+  .workdays-heading {
+    flex-direction: column;
+  }
+
+  .selected-days-count {
+    white-space: normal;
+  }
+
+  .workdays-option {
+    padding: 0.75rem;
+  }
+}
+
+/* =========================================================
+   MÓVILES PEQUEÑOS
+   ========================================================= */
+
+@media (max-width: 400px) {
+
+  .form-card {
+    padding: 0.85rem;
+  }
+
+  .workdays-option {
+    padding: 0.7rem;
+  }
+
+  .workdays-option-title {
+    font-size: 0.82rem;
+  }
+
+  .field-help {
+    font-size: 0.76rem;
+  }
+}
