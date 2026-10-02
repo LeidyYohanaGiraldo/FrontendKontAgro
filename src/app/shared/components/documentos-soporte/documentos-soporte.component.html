@@ -1,0 +1,48 @@
+<section class="support-card">
+  <div class="support-heading">
+    <div>
+      <h3>Documentos soporte</h3>
+      <p>Adjunte facturas, recibos, cuentas de cobro, comprobantes o XML relacionados con este {{ origen === 'INGRESO' ? 'ingreso' : 'egreso' }}.</p>
+    </div>
+  </div>
+
+  <div class="support-form">
+    <div class="field">
+      <label>Tipo de documento</label>
+      <select [(ngModel)]="formulario.tipoDocumento">
+        <option *ngFor="let tipo of tipos" [ngValue]="tipo.value">{{ tipo.label }}</option>
+      </select>
+    </div>
+    <div class="field"><label>Número</label><input type="text" maxlength="80" [(ngModel)]="formulario.numeroDocumento" placeholder="Ej. FE-1024"></div>
+    <div class="field"><label>Fecha del documento</label><input type="date" [(ngModel)]="formulario.fechaDocumento"></div>
+    <div class="field"><label>Tercero / proveedor / cliente</label><input type="text" maxlength="150" [(ngModel)]="formulario.nombreTercero" placeholder="Nombre o razón social"></div>
+    <div class="field"><label>Identificación / NIT</label><input type="text" maxlength="40" [(ngModel)]="formulario.identificacionTercero" placeholder="Opcional"></div>
+    <div class="field file-field">
+      <label>Archivo</label>
+      <input type="file" accept=".pdf,.jpg,.jpeg,.png,.xml,application/pdf,image/jpeg,image/png,application/xml,text/xml" (change)="seleccionarArchivo($event)">
+      <small>PDF, JPG, PNG o XML. Máximo 10 MB.</small>
+    </div>
+  </div>
+
+  <div class="support-actions">
+    <button type="button" class="support-upload" [disabled]="!archivo || cargandoArchivo" (click)="cargar()">
+      <app-ui-icon name="attachment"></app-ui-icon>
+      {{ cargandoArchivo ? 'Cargando...' : 'Cargar soporte' }}
+    </button>
+  </div>
+
+  <div class="support-list" *ngIf="documentos.length > 0; else sinSoportes">
+    <article class="support-item" *ngFor="let documento of documentos">
+      <div class="support-info">
+        <strong>{{ documento.tipoDocumento.replace('_', ' ') }}{{ documento.numeroDocumento ? ' #' + documento.numeroDocumento : '' }}</strong>
+        <span>{{ documento.nombreTercero || 'Sin tercero registrado' }}</span>
+        <small>{{ documento.nombreArchivo }} · {{ formatearTamano(documento.tamanoBytes) }}</small>
+      </div>
+      <div class="support-item-actions">
+        <button type="button" class="icon-button" title="Descargar soporte" (click)="descargar(documento)"><app-ui-icon name="download"></app-ui-icon></button>
+        <button type="button" class="icon-button danger" title="Eliminar soporte" (click)="eliminar(documento)"><app-ui-icon name="delete"></app-ui-icon></button>
+      </div>
+    </article>
+  </div>
+  <ng-template #sinSoportes><p class="support-empty">Este movimiento todavía no tiene documentos soporte.</p></ng-template>
+</section>

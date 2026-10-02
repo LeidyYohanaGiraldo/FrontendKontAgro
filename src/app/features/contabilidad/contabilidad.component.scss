@@ -1,0 +1,128 @@
+@use '../../shared/styles/hover' as hover;
+
+$verde: #2e7d32;
+$verde-oscuro: #14532d;
+$rojo: #b42318;
+$gris: #667085;
+
+.accounting-container { gap: 1.25rem; }
+
+.accounting-filter-grid {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: end;
+
+  button {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+
+    app-ui-icon { width: 20px; height: 20px; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+
+  .btn-save { background: $verde; color: #fff; }
+  .btn-report { background: #fff; color: $verde-oscuro; border-color: #b7d9ba; }
+}
+
+.accounting-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(170px, 1fr));
+  gap: 1rem;
+}
+
+.accounting-card {
+  min-height: 112px;
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #fff;
+  border: 1px solid #eaecf0;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+
+  span { color: $gris; font-size: 0.86rem; }
+  strong { color: #344054; font-size: clamp(1.05rem, 2vw, 1.35rem); overflow-wrap: anywhere; }
+
+  &.income-card { border-left: 4px solid $verde; strong { color: $verde-oscuro; } }
+  &.expenses-card { border-left: 4px solid #d97706; }
+  &.pending-card { border-left: 4px solid #ca8a04; }
+  &.result-card,
+  &.projected-card {
+    background: #eef8ef;
+    border-color: #b7d9ba;
+    strong { color: $verde-oscuro; }
+    &.negative { background: #fff1f0; border-color: #fecdca; strong { color: $rojo; } }
+  }
+  &.projected-card { grid-column: span 2; }
+}
+
+.accounting-table { min-width: 820px; }
+.amount-cell { font-weight: 600; color: #b54708; &.income-amount { color: $verde; } }
+
+.origin-badge {
+  display: inline-flex;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #f2f4f7;
+  color: #475467;
+  &.income { background: #e8f5e9; color: #1b5e20; }
+  &.expense { background: #fff4e5; color: #9a4d00; }
+  &.payroll { background: #eef4ff; color: #3538cd; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .filter-actions button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    @include hover.glow($verde);
+  }
+}
+
+@media (max-width: 1050px) {
+  .accounting-summary { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .accounting-filter-grid { grid-template-columns: 1fr 1fr; }
+  .filter-actions { grid-column: 1 / -1; button { flex: 1; } }
+}
+
+@media (max-width: 520px) {
+  .accounting-filter-grid,
+  .accounting-summary { grid-template-columns: 1fr; }
+  .filter-actions { flex-direction: column; button { width: 100%; } }
+  .accounting-card.projected-card { grid-column: auto; }
+}
+
+.accounting-card small {
+  color: $gris;
+  font-size: 0.76rem;
+  line-height: 1.3;
+}
+
+.pending-section { margin-top: 0.25rem; }
+.obligations-table { min-width: 900px; }
+.pending-amount { color: #9a6700; font-weight: 700; }
+
+@media (max-width: 520px) {
+  .accounting-title p { max-width: 100%; }
+}

@@ -1,0 +1,74 @@
+.support-card {
+  margin-top: 1rem;
+  padding: 1.25rem;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
+}
+
+.support-heading h3 { margin: 0 0 .25rem; }
+.support-heading p { margin: 0; color: #667085; }
+
+.support-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.field { display: flex; flex-direction: column; gap: .35rem; }
+.field label { font-weight: 600; }
+.field input, .field select {
+  min-height: 44px;
+  padding: .65rem .75rem;
+  border: 1px solid #cfd6df;
+  border-radius: 9px;
+  background: #fff;
+}
+.file-field small { color: #667085; }
+
+.support-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
+.support-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  min-height: 44px;
+  padding: .65rem 1rem;
+  border: 0;
+  border-radius: 9px;
+  background: #2e7d32;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.support-upload app-ui-icon { width: 1.1rem; height: 1.1rem; }
+.support-upload:disabled { opacity: .55; cursor: not-allowed; }
+
+.support-list { display: grid; gap: .7rem; margin-top: 1rem; }
+.support-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: .85rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fafcfb;
+}
+.support-info { display: grid; gap: .18rem; min-width: 0; }
+.support-info span, .support-info small { color: #667085; overflow-wrap: anywhere; }
+.support-item-actions { display: flex; gap: .35rem; }
+.support-empty { color: #667085; margin: 1rem 0 0; }
+
+@media (hover: hover) {
+  .support-upload:hover { box-shadow: 0 0 0 1px rgba(46,125,50,.2), 0 0 14px rgba(46,125,50,.28); }
+}
+
+@media (max-width: 900px) { .support-form { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) {
+  .support-form { grid-template-columns: 1fr; }
+  .support-actions, .support-upload { width: 100%; }
+  .support-upload { justify-content: center; }
+  .support-item { align-items: flex-start; }
+}

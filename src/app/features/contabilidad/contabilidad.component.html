@@ -1,0 +1,176 @@
+<div class="gestion-container accounting-container">
+  <section class="form-section">
+    <div class="form-card accounting-filter-card">
+      <div class="section-heading accounting-title">
+        <div>
+          <h2>Contabilidad</h2>
+          <p>Consolide ingresos, egresos y nómina para conocer el resultado real del negocio y las obligaciones laborales pendientes.</p>
+        </div>
+      </div>
+
+      <div class="accounting-filter-grid">
+        <div class="field">
+          <label for="fechaInicialContabilidad">Desde</label>
+          <input id="fechaInicialContabilidad" type="date" [(ngModel)]="fechaInicial">
+        </div>
+        <div class="field">
+          <label for="fechaFinalContabilidad">Hasta</label>
+          <input id="fechaFinalContabilidad" type="date" [(ngModel)]="fechaFinal">
+        </div>
+        <div class="filter-actions">
+          <button type="button" class="btn-save" [disabled]="cargando" (click)="consultar()">
+            <app-ui-icon name="accounting"></app-ui-icon>
+            {{ cargando ? 'Consultando...' : 'Consultar' }}
+          </button>
+          <button type="button" class="btn-report" [disabled]="generandoReporte" (click)="descargarPdf()">
+            <app-ui-icon name="report"></app-ui-icon>
+            {{ generandoReporte ? 'Generando...' : 'Generar reporte' }}
+          </button>
+          <button type="button" class="btn-report" [disabled]="generandoPaquete" (click)="descargarPaqueteContador()">
+            <app-ui-icon name="attachment"></app-ui-icon>
+            {{ generandoPaquete ? 'Preparando...' : 'Paquete contador' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <ng-container *ngIf="resumen as data">
+    <section class="accounting-summary" aria-label="Resumen contable">
+      <article class="accounting-card income-card">
+        <span>Ingresos</span>
+        <strong>{{ data.totalIngresos | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+      </article>
+      <article class="accounting-card">
+        <span>Egresos operativos</span>
+        <strong>{{ data.totalEgresosOperativos | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+      </article>
+      <article class="accounting-card">
+        <span>Nómina pagada</span>
+        <strong>{{ data.totalNominaPagada | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+      </article>
+      <article class="accounting-card expenses-card">
+        <span>Total gastos</span>
+        <strong>{{ data.totalGastos | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+      </article>
+      <article class="accounting-card result-card" [class.negative]="data.resultadoNeto < 0">
+        <span>Resultado neto</span>
+        <strong>{{ data.resultadoNeto | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        <small>{{ data.resultadoNeto > 0 ? 'Ganancia del periodo' : data.resultadoNeto < 0 ? 'Pérdida del periodo' : 'Punto de equilibrio' }}</small>
+      </article>
+      <article class="accounting-card pending-card">
+        <span>Pagos laborales pendientes</span>
+        <strong>{{ data.pagosPendientes | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        <small>{{ obligacionesPendientes.length }} registro(s) por liquidar</small>
+      </article>
+      <article class="accounting-card projected-card" [class.negative]="data.resultadoProyectado < 0">
+        <span>Resultado proyectado</span>
+        <strong>{{ data.resultadoProyectado | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        <small>Resultado neto menos pagos laborales aún pendientes.</small>
+      </article>
+    </section>
+
+    <section class="table-section">
+      <div class="section-heading standalone-heading">
+        <div>
+          <h2>Movimientos del periodo</h2>
+          <p>Detalle consolidado de los ingresos, egresos y nómina efectivamente liquidada.</p>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <table class="kontagro-table accounting-table">
+          <thead>
+            <tr><th>Fecha</th><th>Origen</th><th>Concepto</th><th>Tercero</th><th>Documento</th><th>Soportes</th><th>Valor</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let movimiento of movimientosVisibles">
+              <td>{{ movimiento.fecha | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <span class="origin-badge"
+                      [class.income]="movimiento.origen === 'INGRESO'"
+                      [class.expense]="movimiento.origen === 'EGRESO'"
+                      [class.payroll]="movimiento.origen === 'NOMINA'">
+                  {{ etiquetaOrigen(movimiento.origen) }}
+                </span>
+              </td>
+              <td><strong>{{ movimiento.concepto }}</strong></td>
+              <td>{{ movimiento.tercero || '-' }}</td>
+              <td>{{ movimiento.documento || '-' }}</td>
+              <td>{{ movimiento.soportes || 0 }}</td>
+              <td class="amount-cell" [class.income-amount]="movimiento.origen === 'INGRESO'">
+                {{ movimiento.valor | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </td>
+            </tr>
+            <tr *ngIf="movimientos.length === 0">
+              <td colspan="7" class="empty-message">No hay movimientos en el periodo seleccionado.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <app-paginacion *ngIf="movimientos.length > registrosPorPagina"
+      [paginaActual]="paginaActual"
+      [totalPaginas]="totalPaginas"
+      [totalRegistros]="movimientos.length"
+      [tamanoPagina]="registrosPorPagina"
+      (cambiar)="cambiarPagina($event)">
+    </app-paginacion>
+
+    <section class="table-section pending-section">
+      <div class="section-heading standalone-heading">
+        <div>
+          <h2>Obligaciones laborales pendientes</h2>
+          <p>Estos registros todavía no son gasto realizado; se consideran únicamente para el resultado proyectado.</p>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <table class="kontagro-table obligations-table">
+          <thead>
+            <tr><th>Trabajador</th><th>Tarea</th><th>Días trabajados</th><th>Periodo</th><th>Valor</th><th>Descuentos</th><th>Neto pendiente</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let obligacion of obligacionesPendientes">
+              <td>{{ obligacion.trabajador }}</td>
+              <td>{{ obligacion.tarea }}</td>
+              <td class="cell-observations">{{ formatearDias(obligacion.diasTrabajados) }}</td>
+              <td>{{ obligacion.fechaInicial | date:'dd/MM/yyyy' }} - {{ obligacion.fechaFinal | date:'dd/MM/yyyy' }}</td>
+              <td>{{ obligacion.valorPagar | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td>{{ obligacion.descuentos | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="pending-amount">{{ obligacion.valorNeto | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+            </tr>
+            <tr *ngIf="obligacionesPendientes.length === 0">
+              <td colspan="7" class="empty-message">No hay pagos laborales pendientes en el periodo consultado.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="table-section" *ngIf="data.documentosSoporte?.length">
+      <div class="section-heading standalone-heading">
+        <div>
+          <h2>Documentos soporte del periodo</h2>
+          <p>{{ data.documentosSoporte.length }} archivo(s) asociados a ingresos y egresos. El reporte PDF incluye su relación documental.</p>
+        </div>
+      </div>
+      <div class="table-card">
+        <table class="kontagro-table">
+          <thead><tr><th>Origen</th><th>Tipo</th><th>Número</th><th>Fecha</th><th>Tercero</th><th>Archivo</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let soporte of data.documentosSoporte">
+              <td>{{ soporte.origen === 'INGRESO' ? 'Ingreso' : 'Egreso' }}</td>
+              <td>{{ soporte.tipoDocumento.replace('_', ' ') }}</td>
+              <td>{{ soporte.numeroDocumento || '-' }}</td>
+              <td>{{ soporte.fechaDocumento ? (soporte.fechaDocumento | date:'dd/MM/yyyy') : '-' }}</td>
+              <td>{{ soporte.nombreTercero || '-' }}</td>
+              <td>{{ soporte.nombreArchivo }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+</div>
