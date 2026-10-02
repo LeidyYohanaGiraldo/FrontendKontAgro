@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { Observable } from 'rxjs';
 import { Ingreso } from '../models/ingreso.model';
+import { Page } from '../../../shared/models/page.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,12 +12,12 @@ export class IngresoService {
   private http = inject(HttpClient);
   private readonly URL_API = `${environment.apiUrl}/ingreso`;
 
-  listarTodos(page: number, size: number): Observable<any> {
+  listarTodos(page: number, size: number): Observable<Page<Ingreso>> {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size);
 
-    return this.http.get<any>(
+    return this.http.get<Page<Ingreso>>(
       `${this.URL_API}/ingresos`,
       { params }
     );

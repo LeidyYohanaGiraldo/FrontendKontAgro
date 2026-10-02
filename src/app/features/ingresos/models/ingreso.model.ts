@@ -1,9 +1,14 @@
-import { Actividad } from "../../actividades/models/actividad.model";
-
 export interface Ingreso {
-    
-  id?: number; 
-  idActividad: number; 
-  fecha: string; 
-  valor: number; 
+  id?: number;
+  idActividad: number;
+  nombreActividad?: string | null;
+  fecha: string;
+  valor: number;
+}
+
+export interface IngresoForm {
+  id?: number;
+  idActividad: number | null;
+  fecha: string;
+  valor: number | null;
 }

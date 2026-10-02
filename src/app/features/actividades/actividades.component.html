@@ -1,71 +1,68 @@
 <div class="actividades-container">
-   <!-- Sección del Formulario -->
   <div class="top-section">
     <section class="form-section">
       <div class="form-card">
-        <h2>
-          {{ esEdicion ? 'Editar Actividad' : 'Nueva Actividad' }}
-        </h2>
-        <div class="input-group">
-          <label>Nombre de la actividad</label>
-          <input
-            type="text"
-            [(ngModel)]="actividadSeleccionada.nombreActividad"
-            name="nombreActividad"
-            placeholder="Digite el nombre de la actividad..."
-            (keyup.enter)="guardar()">
-          <div class="error"
-               *ngIf="campoTocado && nombreActividadInvalido">
-            El nombre de la actividad es obligatorio
+        <div class="section-heading">
+          <div>
+            <h2>{{ esEdicion ? 'Editar Actividad' : 'Nueva Actividad' }}</h2>
+            <p>Clasifique la actividad una sola vez. El sistema la mostrará automáticamente en Ingresos o Egresos según corresponda.</p>
+          </div>
+        </div>
+
+        <div class="activity-form-grid">
+          <div class="field field-span-2">
+            <label for="nombreActividad">Nombre de la actividad</label>
+            <input
+              id="nombreActividad"
+              type="text"
+              [(ngModel)]="actividadSeleccionada.nombreActividad"
+              name="nombreActividad"
+              maxlength="255"
+              autocomplete="off"
+              placeholder="Ej. Venta de café, compra de fertilizante"
+              (keyup.enter)="guardar()">
+            <div class="error" *ngIf="campoTocado && nombreActividadInvalido">
+              El nombre de la actividad es obligatorio.
+            </div>
           </div>
 
-          <label>¿A qué actividad económica pertenece?</label>
-          <select
-            [(ngModel)]="actividadSeleccionada.idActividadEconomica"
-            name="idActividadEconomica">
-
-            <option [value]="undefined">
-              Seleccione...
-            </option>
-
-            <option
-              *ngFor="let eco of listaActividadesEconomicas"
-              [value]="eco.id">
-              {{ eco.nombreActividadEconomica }}
-            </option>
-
-          </select>
-
-          <div class="error"
-               *ngIf="campoTocado && actividadEconomicaInvalida">
-            Debe seleccionar una actividad económica
+          <div class="field field-span-2">
+            <label for="tipoMovimiento">Tipo de movimiento</label>
+            <select
+              id="tipoMovimiento"
+              [(ngModel)]="actividadSeleccionada.tipoMovimiento"
+              name="tipoMovimiento">
+              <option [ngValue]="null" disabled>Seleccione Ingreso o Egreso</option>
+              <option *ngFor="let opcion of tiposMovimiento" [ngValue]="opcion.valor">
+                {{ opcion.etiqueta }}
+              </option>
+            </select>
+            <div class="field-help">La lista de tipos permitidos proviene del backend y determina el módulo financiero donde estará disponible.</div>
+            <div class="error" *ngIf="campoTocado && tipoMovimientoInvalido">
+              Debe seleccionar si la actividad corresponde a Ingresos o Egresos.
+            </div>
           </div>
         </div>
 
         <div class="form-actions">
-          <button class="btn-save" (click)="guardar()">
+          <button type="button" class="btn-save" (click)="guardar()">
             {{ esEdicion ? 'Actualizar' : 'Guardar' }}
           </button>
-
-          <button
-            *ngIf="esEdicion"
-            class="btn-cancel"
-            (click)="limpiarFormulario()">
+          <button *ngIf="esEdicion" type="button" class="btn-cancel" (click)="limpiarFormulario()">
             Cancelar
           </button>
         </div>
       </div>
     </section>
 
-    <section class="stats">
+    <section class="stats" aria-label="Resumen de actividades">
       <div class="card total-card">
         <p>Total actividades</p>
-        <h3>📋{{ listaActividades.length }}</h3>
+        <h3>{{ totalRegistros }}</h3>
       </div>
     </section>
   </div>
 
-   <!-- Sección de la Tabla (Visor) -->
   <section class="table-section">
     <div class="table-container">
       <table class="kontagro-table">
@@ -73,35 +70,47 @@
           <tr>
             <th>ID</th>
             <th>Descripción de la Actividad</th>
-            <th>Actividad Económica</th>
+            <th>Tipo de movimiento</th>
             <th class="text-center">Acciones</th>
           </tr>
         </thead>
-
         <tbody>
           <tr *ngFor="let act of listaActividades">
-            <td>{{ act.idActividad }}</td>
-            <td>{{ act.nombreActividad }}</td>
-            <td>{{ act.nombreActividadEconomica }}</td>
-            <td class="col-actions">
-              <button class="btn-edit" (click)="prepararEdicion(act)">
-                ✏️
-              </button>
-              <button class="btn-delete" (click)="eliminar(act.idActividad!)">
-                🗑️
-              </button>
+            <td data-label="ID">{{ act.idActividad }}</td>
+            <td data-label="Actividad" class="cell-truncated"><app-texto-truncado [texto]="act.nombreActividad"></app-texto-truncado></td>
+            <td data-label="Tipo de movimiento">
+              <span
+                class="type-badge"
+                [class.income]="act.tipoMovimiento === TipoMovimiento.INGRESO"
+                [class.expense]="act.tipoMovimiento === TipoMovimiento.EGRESO"
+                [class.unclassified]="!act.tipoMovimiento">
+                {{ obtenerEtiquetaTipo(act.tipoMovimiento) }}
+              </span>
+            </td>
+            <td class="col-actions" data-label="Acciones">
+              <div class="action-group">
+                <button type="button" class="icon-button" title="Editar actividad" (click)="prepararEdicion(act)">
+                  <app-ui-icon name="edit"></app-ui-icon>
+                </button>
+                <button type="button" class="icon-button danger" title="Eliminar actividad" (click)="eliminar(act.idActividad!)">
+                  <app-ui-icon name="delete"></app-ui-icon>
+                </button>
+              </div>
             </td>
           </tr>
-
           <tr *ngIf="listaActividades.length === 0">
-            <td colspan="4" class="empty-message">
-              No hay actividades registradas.
-            </td>
+            <td colspan="4" class="empty-message">No hay actividades registradas.</td>
           </tr>
         </tbody>
       </table>
-
     </div>
   </section>
 
+  <app-paginacion
+    [paginaActual]="paginaActual"
+    [totalPaginas]="totalPaginas"
+    [totalRegistros]="totalRegistros"
+    [tamanoPagina]="registrosPorPagina"
+    (cambiar)="cambiarPagina($event)">
+  </app-paginacion>
 </div>

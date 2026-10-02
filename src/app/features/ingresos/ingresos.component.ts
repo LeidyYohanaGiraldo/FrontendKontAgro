@@ -1,199 +1,179 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { IngresoService } from './services/ingreso.service';
-import { ActividadService } from '../actividades/services/actividad.service';
-import { Ingreso } from './models/ingreso.model';
-import { Actividad } from '../actividades/models/actividad.model';
 import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ModalReporteExcelComponent } from '../../shared/components/modal-reporte-excel/modal-reporte-excel.component';
+import { PaginacionComponent } from '../../shared/components/paginacion/paginacion.component';
+import { UiIconComponent } from '../../shared/components/ui-icon/ui-icon.component';
+import { DocumentosSoporteComponent } from '../../shared/components/documentos-soporte/documentos-soporte.component';
 import { AlertService } from '../../shared/services/alert.service';
+import { Actividad, TipoMovimiento } from '../actividades/models/actividad.model';
+import { ActividadService } from '../actividades/services/actividad.service';
+import { Ingreso, IngresoForm } from './models/ingreso.model';
+import { IngresoService } from './services/ingreso.service';
 
 @Component({
   selector: 'app-ingresos',
   standalone: true,
-  imports: [CommonModule, FormsModule, ModalReporteExcelComponent],
+  imports: [CommonModule, FormsModule, ModalReporteExcelComponent, PaginacionComponent, UiIconComponent, DocumentosSoporteComponent],
   templateUrl: './ingresos.component.html',
   styleUrl: './ingresos.component.scss'
 })
 export class IngresosComponent implements OnInit {
-  private _ingresoService = inject(IngresoService);
-  private _actividadService = inject(ActividadService);
-  private alertService = inject(AlertService);
+  private readonly ingresoService = inject(IngresoService);
+  private readonly actividadService = inject(ActividadService);
+  private readonly alertService = inject(AlertService);
 
-  public listaIngresos: Ingreso[] = [];
-  public listaActividades: Actividad[] = [];
-
-  public ingresoSeleccionado: Ingreso = this.initIngreso();
-  public esEdicion = false;
-  public mostrarModalReporte = false;
-  public paginaActual: number = 0;
-  public registrosPorPagina: number = 5;
-  public totalPaginas: number = 0;
-  public paginas: number[] = [];
+  listaIngresos: Ingreso[] = [];
+  listaActividades: Actividad[] = [];
+  ingresoSeleccionado: IngresoForm = this.inicializarIngreso();
+  esEdicion = false;
+  mostrarModalReporte = false;
+  paginaActual = 0;
+  readonly registrosPorPagina = 5;
+  totalPaginas = 0;
+  totalRegistros = 0;
+  idMovimientoSoportes: number | null = null;
 
   ngOnInit(): void {
-    this.cargarDatos();
+    this.cargarIngresos();
+    this.cargarActividades();
   }
 
-  cargarDatos() {
-    // Cargamos ingresos
-    // Cargamos actividades para el select del formulario
-
-    this._ingresoService
-      .listarTodos(this.paginaActual, this.registrosPorPagina)
-      .subscribe(data => {
-
-        console.log("INGRESOS:", data);
-        this.listaIngresos = data.content;
-        this.totalPaginas = data.totalPages;
-        this.generarPaginas();
-      });
-
-    this._actividadService.listarTodas().subscribe(data => {
-      console.log("ACTIVIDADES:", data);
-      this.listaActividades = data;
-    });
-  }
-
-  generarPaginas(): void {
-    this.paginas = Array.from(
-      { length: this.totalPaginas },
-      (_, i) => i
-    );
-  }
-
-  cambiarPagina(pagina: number) {
-    if (pagina >= 0 && pagina < this.totalPaginas) {
-      this.paginaActual = pagina;
-      this.cargarDatos();
-    }
-  }
-
-  initIngreso(): Ingreso {
-    return {
-      fecha: new Date().toISOString().split('T')[0], // Fecha de hoy por defecto
-      valor: 0,
-      idActividad: 0
-    };
-  }
-
-  // El método guardar enviará el objeto tal cual lo espera el @RequestBody IngresoDTO
-  guardar() {
-    // VALIDACIONES
-    if (this.ingresoSeleccionado.idActividad === 0) {
-      this.alertService.warning(
-        'Debe seleccionar una actividad');
-      return;
-    }
-
-    if (!this.ingresoSeleccionado.valor || this.ingresoSeleccionado.valor <= 0) {
-      this.alertService.warning(
-        'El monto debe ser mayor a 0'
-      );
-
-      return;
-    }
-
-    if (!this.ingresoSeleccionado.fecha) {
-      this.alertService.warning(
-        'La fecha es obligatoria'
-      );
-      return;
-    }
-
-    // Si pasa las validaciones, ejecutamos la petición
-    const servicio = this.esEdicion
-      ? this._ingresoService.actualizar(this.ingresoSeleccionado)
-      : this._ingresoService.crear(this.ingresoSeleccionado);
-
-    servicio.subscribe({
-      next: () => {
-        this.alertService.success(
-
-          this.esEdicion
-            ? 'Ingreso actualizado correctamente'
-            : 'Ingreso registrado correctamente'
-        );
-        this.cargarDatos();
-        this.limpiarFormulario();
-      },
-      error: (err) => {
-        console.error(err);
-        this.alertService.error(
-          'Error al procesar la solicitud'
-        );
+  cargarIngresos(): void {
+    this.ingresoService.listarTodos(this.paginaActual, this.registrosPorPagina).subscribe({
+      next: (page) => {
+        this.listaIngresos = page.content;
+        this.totalPaginas = page.totalPages;
+        this.totalRegistros = page.totalElements;
+        this.paginaActual = page.number;
       }
     });
   }
 
-  prepararEdicion(ingreso: Ingreso) {
-    this.ingresoSeleccionado = { ...ingreso };
-    this.esEdicion = true;
+  cargarActividades(): void {
+    this.actividadService.listarCombo(TipoMovimiento.INGRESO).subscribe({
+      next: (actividades) => this.listaActividades = actividades,
+      error: () => this.listaActividades = []
+    });
   }
 
-  limpiarFormulario() {
-    this.ingresoSeleccionado = this.initIngreso();
-    this.esEdicion = false;
-  }
-
-  eliminar(id: number) {
-    if (confirm('¿Eliminar este registro de ingreso?')) {
-      this._ingresoService
-        .eliminar(id)
-        .subscribe({
-          next: () => {
-            this.alertService.success(
-              'Ingreso eliminado correctamente'
-            );
-            this.cargarDatos();
-          },
-
-          error: () => {
-            this.alertService.error(
-              'No fue posible eliminar el ingreso'
-            );
-          }
-        });
+  cambiarPagina(pagina: number): void {
+    if (pagina >= 0 && pagina < this.totalPaginas) {
+      this.paginaActual = pagina;
+      this.cargarIngresos();
     }
   }
 
-  obtenerNombreActividad(idActividad: number): string {
-    const actividad = this.listaActividades.find(
-      a => a.idActividad == idActividad
-    );
-    return actividad ? actividad.nombreActividad : '';
+  guardar(): void {
+    const ingreso = this.construirIngreso();
+    if (!ingreso) {
+      return;
+    }
+
+    const request$ = this.esEdicion
+      ? this.ingresoService.actualizar(ingreso)
+      : this.ingresoService.crear(ingreso);
+
+    request$.subscribe({
+      next: () => {
+        this.alertService.success(
+          this.esEdicion ? 'Ingreso actualizado correctamente' : 'Ingreso registrado correctamente'
+        );
+        this.limpiarFormulario();
+        this.cargarIngresos();
+      }
+    });
   }
 
-  abrirModalReporte() {
+  prepararEdicion(ingreso: Ingreso): void {
+    this.ingresoSeleccionado = {
+      id: ingreso.id,
+      idActividad: ingreso.idActividad,
+      fecha: ingreso.fecha,
+      valor: ingreso.valor
+    };
+    this.esEdicion = true;
+  }
+
+  limpiarFormulario(): void {
+    this.ingresoSeleccionado = this.inicializarIngreso();
+    this.esEdicion = false;
+  }
+
+  eliminar(id: number): void {
+    if (!window.confirm('¿Eliminar este registro de ingreso?')) {
+      return;
+    }
+
+    this.ingresoService.eliminar(id).subscribe({
+      next: () => {
+        this.alertService.success('Ingreso eliminado correctamente');
+        this.cargarIngresos();
+      }
+    });
+  }
+
+  obtenerNombreActividad(ingreso: Ingreso): string {
+    if (ingreso.nombreActividad) {
+      return ingreso.nombreActividad;
+    }
+    return this.listaActividades.find(
+      actividad => actividad.idActividad === ingreso.idActividad
+    )?.nombreActividad ?? `Actividad #${ingreso.idActividad}`;
+  }
+
+  abrirModalReporte(): void {
     this.mostrarModalReporte = true;
   }
 
-  cerrarModalReporte() {
+  cerrarModalReporte(): void {
     this.mostrarModalReporte = false;
   }
 
-  generarReporteExcel(event: any) {
-    this._ingresoService
-      .descargarReporte(event.fechaInicial, event.fechaFinal)
-      .subscribe({
-        next: (blob) => {
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'reporte_ingresos.xlsx';
-          a.click();
-          window.URL.revokeObjectURL(url);
-          this.cerrarModalReporte();
-          this.alertService.success(
-            'Reporte descargado correctamente'
-          );
-        },
-        error: (err) => {
-          console.error(err);
-          this.alertService.error(
-            'Error al descargar reporte'
-          );
-        }
-      });
+  generarReporteExcel(event: { fechaInicial: string; fechaFinal: string }): void {
+    this.ingresoService.descargarReporte(event.fechaInicial, event.fechaFinal).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const enlace = document.createElement('a');
+        enlace.href = url;
+        enlace.download = 'reporte_ingresos.xlsx';
+        enlace.click();
+        window.URL.revokeObjectURL(url);
+        this.cerrarModalReporte();
+        this.alertService.success('Reporte descargado correctamente');
+      },
+      error: () => this.alertService.error('Error al descargar reporte')
+    });
+  }
+
+  alternarSoportes(id: number): void {
+    this.idMovimientoSoportes = this.idMovimientoSoportes === id ? null : id;
+  }
+
+  private inicializarIngreso(): IngresoForm {
+    return {
+      idActividad: null,
+      fecha: new Date().toISOString().split('T')[0],
+      valor: null
+    };
+  }
+
+  private construirIngreso(): Ingreso | null {
+    const { id, idActividad, fecha, valor } = this.ingresoSeleccionado;
+
+    if (!idActividad) {
+      this.alertService.warning('Debe seleccionar una actividad asociada a ingresos');
+      return null;
+    }
+    if (valor == null || !Number.isFinite(Number(valor)) || Number(valor) <= 0) {
+      this.alertService.warning('El monto debe ser mayor a cero');
+      return null;
+    }
+    if (!fecha) {
+      this.alertService.warning('La fecha es obligatoria');
+      return null;
+    }
+
+    return { id, idActividad, fecha, valor: Number(valor) };
   }
 }

@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { Observable } from 'rxjs';
 import { Egreso } from '../models/egreso.model';
+import { Page } from '../../../shared/models/page.model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,12 +13,12 @@ export class EgresoService {
 private http = inject(HttpClient);
   private readonly URL_API = `${environment.apiUrl}/egreso`;
 
-  listarTodos(page: number, size: number): Observable<any> {
+  listarTodos(page: number, size: number): Observable<Page<Egreso>> {
   const params = new HttpParams()
     .set('page', page)
     .set('size', size);
 
-  return this.http.get<any>(
+  return this.http.get<Page<Egreso>>(
     `${this.URL_API}/egresos`,
     { params }
   );

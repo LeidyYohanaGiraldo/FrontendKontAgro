@@ -1,43 +1,52 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Actividad } from '../models/actividad.model';
 import { environment } from '../../../../environments/environment';
+import { Page } from '../../../shared/models/page.model';
+import { Actividad, TipoMovimiento, TipoMovimientoOpcion } from '../models/actividad.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ActividadService {
-  private http = inject(HttpClient);
-  
-  // Construcción URL usando la constante global
-  private readonly URL_API = `${environment.apiUrl}/actividad`; 
+  private readonly http = inject(HttpClient);
+  private readonly urlApi = `${environment.apiUrl}/actividad`;
 
- // Consultar actividades (Lista completa)
-  listarTodas(): Observable<Actividad[]> {
-    return this.http.get<Actividad[]>(`${this.URL_API}/actividades`);
+  listarTodas(page: number, size: number): Observable<Page<Actividad>> {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('size', size);
+
+    return this.http.get<Page<Actividad>>(`${this.urlApi}/actividades`, { params });
   }
 
-  // Consultar por id(Consultar una sola)
+  listarCombo(tipoMovimiento?: TipoMovimiento): Observable<Actividad[]> {
+    const params = tipoMovimiento
+      ? new HttpParams().set('tipoMovimiento', tipoMovimiento)
+      : undefined;
+
+    return this.http.get<Actividad[]>(`${this.urlApi}/combo`, { params });
+  }
+
+  listarTiposMovimiento(): Observable<TipoMovimientoOpcion[]> {
+    return this.http.get<TipoMovimientoOpcion[]>(`${this.urlApi}/tipos-movimiento`);
+  }
+
   consultarPorId(id: number): Observable<Actividad> {
     const params = new HttpParams().set('id', id);
-    return this.http.get<Actividad>(this.URL_API, { params });
+    return this.http.get<Actividad>(this.urlApi, { params });
   }
 
-  // Crear actividad
   crear(actividad: Actividad): Observable<Actividad> {
-    return this.http.post<Actividad>(`${this.URL_API}/crear`, actividad);
+    return this.http.post<Actividad>(`${this.urlApi}/crear`, actividad);
   }
 
-  // Actualizar actividad
   actualizar(actividad: Actividad): Observable<Actividad> {
-    return this.http.put<Actividad>(this.URL_API, actividad);
+    return this.http.put<Actividad>(this.urlApi, actividad);
   }
 
-  // Eliminar actividad por id
   eliminar(id: number): Observable<void> {
     const params = new HttpParams().set('id', id);
-    return this.http.delete<void>(this.URL_API, { params });
+    return this.http.delete<void>(this.urlApi, { params });
   }
-
 }

@@ -1,131 +1,146 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { ActividadService } from './services/actividad.service';
-import { Actividad } from './models/actividad.model';
 import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { PaginacionComponent } from '../../shared/components/paginacion/paginacion.component';
+import { TextoTruncadoComponent } from '../../shared/components/texto-truncado/texto-truncado.component';
+import { UiIconComponent } from '../../shared/components/ui-icon/ui-icon.component';
 import { AlertService } from '../../shared/services/alert.service';
-import { ActividadEconomicaService } from '../../core/services/actividad-economica/actividad-economica.service';
-import { ActividadEconomica } from '../../core/models/actividad-economica.model';
+import { Actividad, TipoMovimiento, TipoMovimientoOpcion } from './models/actividad.model';
+import { ActividadService } from './services/actividad.service';
 
 @Component({
   selector: 'app-actividades',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PaginacionComponent, UiIconComponent, TextoTruncadoComponent],
   templateUrl: './actividades.component.html',
   styleUrl: './actividades.component.scss'
 })
 export class ActividadesComponent implements OnInit {
-  // Inyectamos el servicio que creamos con la URL global
-  private _actividadService = inject(ActividadService);
-  private alertService = inject(AlertService);
-  private actividadEconomicaService = inject(ActividadEconomicaService);
+  private readonly actividadService = inject(ActividadService);
+  private readonly alertService = inject(AlertService);
 
-  // Variables para la vista
-  public listaActividades: Actividad[] = [];
+  readonly TipoMovimiento = TipoMovimiento;
 
-  public actividadSeleccionada: Actividad = {
-    nombreActividad: '',
-    idActividadEconomica: undefined
-  };
-  public esEdicion: boolean = false;
-  public campoTocado: boolean = false;
-
-  //Lista para el combobox
-  public listaActividadesEconomicas: ActividadEconomica[] = [];
+  listaActividades: Actividad[] = [];
+  tiposMovimiento: TipoMovimientoOpcion[] = [];
+  actividadSeleccionada: Actividad = this.inicializarActividad();
+  esEdicion = false;
+  campoTocado = false;
+  paginaActual = 0;
+  readonly registrosPorPagina = 5;
+  totalPaginas = 0;
+  totalRegistros = 0;
 
   get nombreActividadInvalido(): boolean {
     return !this.actividadSeleccionada.nombreActividad?.trim();
   }
 
-  get actividadEconomicaInvalida(): boolean {
-    return !this.actividadSeleccionada.idActividadEconomica;
+  get tipoMovimientoInvalido(): boolean {
+    return !this.actividadSeleccionada.tipoMovimiento;
   }
 
   ngOnInit(): void {
     this.obtenerTodas();
-    this.obtenerActividadesEconomicas();
+    this.obtenerTiposMovimiento();
   }
 
   obtenerTodas(): void {
-    this._actividadService.listarTodas().subscribe({
-      next: (data) => {
-        this.listaActividades = data;
+    this.actividadService.listarTodas(this.paginaActual, this.registrosPorPagina).subscribe({
+      next: (page) => {
+        this.listaActividades = page.content;
+        this.totalPaginas = page.totalPages;
+        this.totalRegistros = page.totalElements;
+        this.paginaActual = page.number;
       },
+      error: () => {
+        this.listaActividades = [];
+        this.totalPaginas = 0;
+        this.totalRegistros = 0;
+      }
     });
   }
-  obtenerActividadesEconomicas(): void {
-    this.actividadEconomicaService.listarTodas().subscribe({
-      next: (data) => {
 
-        console.log('DATA COMBO:', data);
-        this.listaActividadesEconomicas = data;
-      },
-    error: (err) => {
-      console.error('ERROR COMBO:', err);
-    }
+  obtenerTiposMovimiento(): void {
+    this.actividadService.listarTiposMovimiento().subscribe({
+      next: (tipos) => this.tiposMovimiento = tipos,
+      error: () => this.tiposMovimiento = []
+      // El interceptor global ya mostró el mensaje enviado por Spring Boot.
     });
+  }
+
+  cambiarPagina(pagina: number): void {
+    this.paginaActual = pagina;
+    this.obtenerTodas();
   }
 
   guardar(): void {
     this.campoTocado = true;
 
     if (this.nombreActividadInvalido) {
-      this.alertService.warning('El nombre es obligatorio');
+      this.alertService.warning('El nombre de la actividad es obligatorio.');
+      return;
+    }
+    if (this.tipoMovimientoInvalido) {
+      this.alertService.warning('Debe seleccionar si la actividad corresponde a Ingresos o Egresos.');
       return;
     }
 
-    if (this.actividadEconomicaInvalida) {
-      this.alertService.warning('Debe seleccionar una actividad económica');
-      return;
-    }
+    const actividad: Actividad = {
+      idActividad: this.actividadSeleccionada.idActividad,
+      nombreActividad: this.actividadSeleccionada.nombreActividad.trim(),
+      tipoMovimiento: this.actividadSeleccionada.tipoMovimiento
+    };
 
     const request$ = this.esEdicion
-      ? this._actividadService.actualizar(this.actividadSeleccionada)
-      : this._actividadService.crear(this.actividadSeleccionada);
+      ? this.actividadService.actualizar(actividad)
+      : this.actividadService.crear(actividad);
 
     request$.subscribe({
       next: () => {
-
-        const mensaje = this.esEdicion
-          ? 'Actividad actualizada correctamente'
-          : 'Actividad creada exitosamente';
-
-        this.alertService.success(mensaje);
-
+        this.alertService.success(this.esEdicion
+          ? 'Actividad actualizada correctamente.'
+          : 'Actividad creada correctamente.');
         this.limpiarFormulario();
         this.obtenerTodas();
-      }
+      },
+      error: () => { /* El interceptor global muestra el mensaje enviado por Spring Boot. */ }
     });
   }
 
   prepararEdicion(actividad: Actividad): void {
-    // Usamos el operador spread (...) para crear una copia del objeto.
-    // Así, si el usuario escribe en el input pero luego cancela, 
-    // los datos originales de la tabla no se habrán modificado.
     this.actividadSeleccionada = { ...actividad };
     this.esEdicion = true;
+    this.campoTocado = false;
   }
 
   eliminar(id: number): void {
-    if (confirm('¿Estás seguro de eliminar esta actividad?')) {
-      this._actividadService.eliminar(id).subscribe({
-        next: () => {
-          this.alertService.success(
-            'Actividad eliminada correctamente'
-          );
-          this.obtenerTodas();
-        },
-      });
+    if (!window.confirm('¿Está seguro de eliminar esta actividad?')) {
+      return;
     }
+
+    this.actividadService.eliminar(id).subscribe({
+      next: () => {
+        this.alertService.success('Actividad eliminada correctamente.');
+        this.obtenerTodas();
+      },
+      error: () => { /* Mensaje gestionado globalmente. */ }
+    });
   }
 
   limpiarFormulario(): void {
-    this.actividadSeleccionada = {
-      nombreActividad: '',
-      idActividadEconomica: undefined
-    };
-
+    this.actividadSeleccionada = this.inicializarActividad();
     this.esEdicion = false;
     this.campoTocado = false;
+  }
+
+  obtenerEtiquetaTipo(tipo?: TipoMovimiento | null): string {
+    return this.tiposMovimiento.find(opcion => opcion.valor === tipo)?.etiqueta ?? 'Sin clasificar';
+  }
+
+  private inicializarActividad(): Actividad {
+    return {
+      nombreActividad: '',
+      tipoMovimiento: null
+    };
   }
 }

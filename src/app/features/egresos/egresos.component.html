@@ -1,38 +1,56 @@
-<div class="egresos-container">
+<div class="movimiento-container">
   <section class="form-section">
     <div class="form-card">
-      <h2>{{ esEdicion ? 'Editar Egreso' : 'Registrar Nuevo Egreso' }}</h2>
+      <div class="section-heading">
+        <div>
+          <h2>{{ esEdicion ? 'Editar Egreso' : 'Registrar Nuevo Egreso' }}</h2>
+          <p>Solo se muestran actividades previamente clasificadas como egreso.</p>
+        </div>
+      </div>
 
       <div class="grid-form">
         <div class="field">
-          <label>Actividad vinculada</label>
-          <select [(ngModel)]="egresoSeleccionado.idActividad">
-            <option [ngValue]="0" disabled>Seleccione una actividad</option>
-            <option *ngFor="let act of listaActividades" [value]="act.idActividad">
+          <label for="actividadEgreso">Actividad vinculada</label>
+          <select id="actividadEgreso" [(ngModel)]="egresoSeleccionado.idActividad">
+            <option [ngValue]="null" disabled>Seleccione una actividad</option>
+            <option *ngFor="let act of listaActividades" [ngValue]="act.idActividad">
               {{ act.nombreActividad }}
             </option>
           </select>
-        </div>
-        <div class="field">
-          <label>Monto ($)</label>
-          <input type="number" [(ngModel)]="egresoSeleccionado.valor" placeholder="0.00">
+          <small class="field-help" *ngIf="listaActividades.length === 0">
+            No hay actividades clasificadas como egreso. Créelas o clasifícalas desde Actividades.
+          </small>
         </div>
 
         <div class="field">
-          <label>Fecha de egreso</label>
-          <input type="date" [(ngModel)]="egresoSeleccionado.fecha">
+          <label for="valorEgreso">Monto ($)</label>
+          <input
+            id="valorEgreso"
+            type="number"
+            min="1"
+            step="1000"
+            inputmode="decimal"
+            [(ngModel)]="egresoSeleccionado.valor"
+            placeholder="Ingrese el valor">
+        </div>
+
+        <div class="field">
+          <label for="fechaEgreso">Fecha de egreso</label>
+          <input id="fechaEgreso" type="date" [(ngModel)]="egresoSeleccionado.fecha">
         </div>
       </div>
 
       <div class="form-actions">
-        <button class="btn-save" (click)="guardar()">
-          {{ esEdicion ? 'Actualizar' : 'Confirmar Ingreso' }}
+        <button class="btn-save" type="button" (click)="guardar()">
+          {{ esEdicion ? 'Actualizar' : 'Confirmar Egreso' }}
         </button>
-        <button *ngIf="esEdicion" class="btn-cancel" (click)="limpiarFormulario()">Cancelar</button>
+        <button *ngIf="esEdicion" class="btn-cancel" type="button" (click)="limpiarFormulario()">
+          Cancelar
+        </button>
       </div>
     </div>
   </section>
-  
+
   <section class="table-section">
     <div class="table-card">
       <table class="kontagro-table">
@@ -45,32 +63,43 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let ing of listaEgresos">
-            <td>{{ ing.fecha | date:'dd/MM/yyyy' }}</td>
-            <td>
-              <strong>
-                {{ obtenerNombreActividad(ing.idActividad) }}
-              </strong>
-            </td>
-            <td class="text-success">{{ ing.valor | currency:'COP':'symbol':'1.0-0' }}</td>
+          <tr *ngFor="let egreso of listaEgresos">
+            <td>{{ egreso.fecha | date:'dd/MM/yyyy' }}</td>
+            <td><strong>{{ obtenerNombreActividad(egreso) }}</strong></td>
+            <td class="text-success">{{ egreso.valor | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
             <td class="col-actions">
-              <button class="btn-edit" (click)="prepararEdicion(ing)">✏️</button>
-              <button class="btn-delete" (click)="eliminar(ing.id!)">🗑️</button>
+              <div class="action-group">
+                <button type="button" class="icon-button" title="Editar egreso" (click)="prepararEdicion(egreso)">
+                  <app-ui-icon name="edit"></app-ui-icon>
+                </button>
+                <button type="button" class="icon-button" title="Documentos soporte" (click)="alternarSoportes(egreso.id!)">
+                  <app-ui-icon name="attachment"></app-ui-icon>
+                </button>
+                <button type="button" class="icon-button danger" title="Eliminar egreso" (click)="eliminar(egreso.id!)">
+                  <app-ui-icon name="delete"></app-ui-icon>
+                </button>
+              </div>
             </td>
+          </tr>
+          <tr *ngIf="listaEgresos.length === 0">
+            <td colspan="4" class="empty-message">No hay egresos registrados.</td>
           </tr>
         </tbody>
       </table>
-      <div class="pagination">
-        <button (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 0">
-          ⬅ Anterior
-        </button>
-        <button *ngFor="let pagina of paginas" (click)="cambiarPagina(pagina)" [class.active]="paginaActual === pagina">
-          {{ pagina + 1 }}
-        </button>
-        <button (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas - 1">
-          Siguiente ➡
-        </button>
-      </div>
     </div>
   </section>
+
+  <app-documentos-soporte
+    *ngIf="idMovimientoSoportes"
+    [origen]="'EGRESO'"
+    [movimientoId]="idMovimientoSoportes">
+  </app-documentos-soporte>
+
+  <app-paginacion
+    [paginaActual]="paginaActual"
+    [totalPaginas]="totalPaginas"
+    [totalRegistros]="totalRegistros"
+    [tamanoPagina]="registrosPorPagina"
+    (cambiar)="cambiarPagina($event)">
+  </app-paginacion>
 </div>
