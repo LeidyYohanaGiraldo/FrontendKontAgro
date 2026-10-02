@@ -15,7 +15,7 @@ export const appConfig: ApplicationConfig = {
   providers:
     [provideRouter(routes),
     provideHttpClient(
-      withInterceptors([authInterceptor,errorInterceptor])
+      withInterceptors([errorInterceptor, authInterceptor])
     ),
     { provide: LOCALE_ID, useValue: 'es-CO' }
       // provideClientHydration()

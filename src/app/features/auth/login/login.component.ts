@@ -23,24 +23,12 @@ export class LoginComponent {
 
   };
   
-  onLogin() {
+  onLogin(): void {
     this.authService.login(this.credenciales).subscribe({
-      next: (response) => {
-        console.log('¡Bienvenido!', response);
-        // Se guarda el token que generó Java en el navegador
-        localStorage.setItem('token', response.token);
-
-        this.router.navigate(['/menu']);
-        //alert('Login exitoso');
-      },
-      error: (err) => {
-        console.error('Error en el login', err);
-        alert('Usuario o contraseña incorrectos');
-      }
+      next: () => this.router.navigate(['/menu']),
+      error: () => { /* El interceptor global muestra el mensaje enviado por el backend. */ }
     });
   }
-
-
 }
 
 

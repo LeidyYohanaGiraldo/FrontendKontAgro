@@ -1,104 +1,142 @@
-// Variables de marca
 $color-principal: #006600;
 $color-fondo-formulario: #ccffcc63;
 $color-texto: #003300;
-$color-fondo-input: #CCCCCC;
+$color-fondo-input: #ccc;
 
 .login-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; 
+  min-height: 100vh;
+  min-height: 100dvh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
   .main-header {
-    background: white;
-    padding: 0rem 1rem;
-    box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    padding: 0.35rem 1rem;
+    background: #fff;
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.05);
     z-index: 2;
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: bold;
-      font-size: 1.2rem;
-      img { height: 40px; }
+    .logo img {
+      display: block;
+      max-width: min(210px, 55vw);
+      height: 42px;
+      object-fit: contain;
     }
   }
 
   .login-main {
-    flex: 1; 
+    flex: 1;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    
-    background: url('/assets/img/ImgFondoLogin.png') no-repeat center center;
-    background-size: cover;
+    padding: 2rem 1rem;
+    background: url('/assets/img/ImgFondoLogin.png') no-repeat center center / cover;
 
     &::before {
       content: '';
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
+      inset: 0;
       background: rgba(0, 0, 0, 0.25);
     }
 
     .glass-card {
-      position: relative; 
-      background: $color-fondo-formulario;
-      backdrop-filter: blur(8px); 
-      padding: 3rem;
+      position: relative;
+      width: min(100%, 380px);
+      padding: clamp(1.4rem, 5vw, 2.5rem);
       border-radius: 24px;
-      width: 20%;
-      max-width: 300px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      background: $color-fondo-formulario;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
       text-align: center;
 
-      h3 { color: $color-principal; margin-bottom: 0.5rem; }
-      p { color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
+      h3 {
+        margin: 0 0 0.5rem;
+        color: $color-principal;
+        line-height: 1.25;
+      }
 
-    
-      .input-group input,
-      .btn-login {
-        width: 100%;
-        padding: 0.8rem;
-        font-size: 1rem;
-        box-sizing: border-box;
+      p {
+        margin-bottom: 2rem;
+        color: #666;
+        font-size: 0.9rem;
       }
 
       .input-group {
+        margin-bottom: 1.25rem;
         text-align: left;
-        margin-bottom: 1.5rem;
-        label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: $color-texto; }
+
+        label {
+          display: block;
+          margin-bottom: 0.5rem;
+          color: $color-texto;
+          font-weight: 600;
+        }
+
         input {
+          width: 100%;
+          padding: 0.8rem;
           border: 1px solid #ddd;
-           border-radius: 12px;
-          transition: border 0.3s;
+          border-radius: 12px;
           background: $color-fondo-input;
-          &:focus { outline: none; border-color:  #ddd; }
+          font-size: 1rem;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+          &:focus {
+            outline: none;
+            border-color: $color-principal;
+            box-shadow: 0 0 0 3px rgba($color-principal, 0.12);
+          }
         }
       }
 
       .btn-login {
-      
-        background: $color-principal;
-        color: white;
-        border: none;
+        width: 100%;
+        min-height: 44px;
+        padding: 0.8rem;
+        border: 0;
         border-radius: 35px;
-        font-weight: bold;
+        background: $color-principal;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 700;
         cursor: pointer;
-        transition: transform 0.2s;
-        &:hover { background: lighten($color-principal, 5%); transform: translateY(-2px); }
+        transition: transform 0.2s ease, background-color 0.2s ease;
       }
     }
   }
+
   .main-footer {
-    background: #f8f9fa;
-    padding: 0rem 2rem;
     display: flex;
-    justify-content:  center; 
+    justify-content: center;
     align-items: center;
-    font-size: 0.85rem;
+    padding: 0.45rem 1rem;
+    background: #f8f9fa;
     color: #777;
+    font-size: 0.8rem;
+    text-align: center;
+
+    p { margin: 0; }
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .login-container .login-main .glass-card .btn-login:hover {
+    background: #007a00;
+    transform: translateY(-2px);
+  }
+}
+
+@media (max-width: 420px) {
+  .login-container .login-main {
+    padding: 1rem 0.75rem;
+  }
+
+  .login-container .login-main .glass-card {
+    border-radius: 18px;
   }
 }

@@ -1,72 +1,45 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { AlertService } from '../../../shared/services/alert.service';
 import { catchError, throwError, timeout, TimeoutError } from 'rxjs';
+import { AlertService } from '../../../shared/services/alert.service';
+import { extraerMensajeBackend } from '../../utils/http-error.util';
+import { SUPPRESS_GLOBAL_HTTP_ERROR } from './error-context';
 
+/**
+ * Centraliza los errores HTTP. Para respuestas del servidor, la prioridad es
+ * siempre el mensaje enviado por Spring Boot. Las solicitudes técnicas que
+ * gestionan su propio error pueden desactivar únicamente esta alerta global.
+ */
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
-
   const alertService = inject(AlertService);
+  const suprimirAlerta = req.context.get(SUPPRESS_GLOBAL_HTTP_ERROR);
 
   return next(req).pipe(
-
     timeout(15000),
     catchError((error: unknown) => {
+      if (suprimirAlerta) {
+        return throwError(() => error);
+      }
 
-      let mensaje = 'Ocurrió un error inesperado, comuniquese con el administrador';
-
-      // Timeout
       if (error instanceof TimeoutError) {
-        mensaje = 'El servidor tardó demasiado en responder';
-        alertService.error(mensaje);
+        alertService.error('El servidor tardó demasiado en responder.');
         return throwError(() => error);
       }
 
-      // HTTP ERRORS
       if (error instanceof HttpErrorResponse) {
-
-        const backendMessage = error?.error?.message?.trim();
-        const backendErrors = error?.error?.errors;
-
-        // Sin conexión
         if (error.status === 0) {
-          mensaje = 'No hay conexión con el servidor';
+          alertService.error('No fue posible establecer conexión con el servidor.');
+          return throwError(() => error);
         }
 
-        // 401
-        else if (error.status === 401) {
-          mensaje = backendMessage || 'No autorizado';
-        }
-
-        // 403
-        else if (error.status === 403) {
-          mensaje = backendMessage || 'No tienes permisos';
-        }
-
-        //  400 / 404
-        else if (error.status === 400 || error.status === 404) {
-          mensaje = backendMessage || 'Solicitud inválida o no encontrada';
-        }
-
-        // 500+
-        else if (error.status >= 500) {
-          mensaje = backendMessage || 'Error interno del servidor';
-        }
-
-        //  VALIDACIONES (solo si existen)
-        if (backendErrors && typeof backendErrors === 'object') {
-          const erroresPlano = Object.values(backendErrors)
-            .flat()
-            .filter(Boolean)
-            .join(' | ');
-
-          if (erroresPlano) {
-            mensaje = erroresPlano;
-          }
-        }
-        alertService.error(mensaje);
+        const mensajeBackend = extraerMensajeBackend(error.error);
+        alertService.error(
+          mensajeBackend ?? 'El servidor no proporcionó un detalle para el error ocurrido.'
+        );
         return throwError(() => error);
       }
-      alertService.error(mensaje);
+
+      alertService.error('Ocurrió un error inesperado al procesar la respuesta.');
       return throwError(() => error);
     })
   );
