@@ -1,0 +1,121 @@
+<div class="gestion-container">
+  <section class="form-section">
+    <div class="form-card">
+      <div class="section-heading"><div>
+        <h2>Liquidar Nómina</h2>
+        <p>Seleccione un trabajador y las tareas pendientes que desea pagar. Los valores definitivos se recalculan y validan en el servidor.</p>
+      </div></div>
+
+      <div class="grid-form payroll-worker-grid">
+        <div class="field">
+          <label for="trabajadorLiquidacion">Trabajador</label>
+          <select id="trabajadorLiquidacion" [(ngModel)]="idTrabajadorSeleccionado" (ngModelChange)="cambiarTrabajador()">
+            <option [ngValue]="0">Seleccione un trabajador</option>
+            <option *ngFor="let trabajador of listaTrabajadores" [ngValue]="trabajador.id">{{ trabajador.nombre }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div *ngIf="idTrabajadorSeleccionado" class="pending-payments">
+        <div class="subsection-title"><div>
+          <h3>Pagos pendientes por tareas</h3>
+          <p>Puede seleccionar uno o varios registros. La nómina tomará automáticamente el periodo menor y mayor y sumará los valores seleccionados.</p>
+        </div></div>
+
+        <div class="table-card compact-table-card">
+          <table class="kontagro-table selection-table">
+            <thead><tr>
+              <th class="selection-column"><input type="checkbox" aria-label="Seleccionar todos los pagos liquidables"
+                  [checked]="todosSeleccionados" [disabled]="pagosLiquidables.length === 0"
+                  (change)="cambiarSeleccionTodos($any($event.target).checked)"></th>
+              <th>Tarea</th><th>Días trabajados</th><th>Periodo calculado</th><th>Valor a pagar</th><th>Descuentos</th><th>Neto</th><th>Observaciones</th>
+            </tr></thead>
+            <tbody>
+              <tr *ngFor="let pago of pagosPendientes" [class.row-disabled]="!pagoEsLiquidable(pago)" [class.row-selected]="estaSeleccionado(pago)">
+                <td class="selection-column"><input type="checkbox" [checked]="estaSeleccionado(pago)" [disabled]="!pagoEsLiquidable(pago)"
+                    [attr.title]="pagoEsLiquidable(pago) ? 'Seleccionar pago' : 'Complete la tarea y el valor antes de liquidar'"
+                    (change)="cambiarSeleccion(pago, $any($event.target).checked)"></td>
+                <td>{{ obtenerNombreTarea(pago.idTarea, pago.nombreTarea) }}</td>
+                <td class="cell-observations">{{ obtenerDiasPago(pago) }}</td>
+                <td>{{ pago.fechaInicial | date:'dd/MM/yyyy' }} - {{ pago.fechaFinal | date:'dd/MM/yyyy' }}</td>
+                <td><ng-container *ngIf="pago.valorPagar != null; else pagoSinValor">{{ pago.valorPagar | currency:'COP':'symbol-narrow':'1.0-0' }}</ng-container><ng-template #pagoSinValor><span class="text-warning">Por definir</span></ng-template></td>
+                <td>{{ pago.valorDescuentos | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+                <td>{{ obtenerNetoPago(pago) | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+                <td class="cell-observations">{{ pago.observaciones || '-' }}</td>
+              </tr>
+              <tr *ngIf="pagosPendientes.length === 0"><td colspan="8" class="empty-message">Este trabajador no tiene pagos pendientes.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div *ngIf="pagosSeleccionados.length > 0" class="payroll-summary" aria-live="polite">
+        <div class="summary-item"><span>Días seleccionados</span><strong>{{ totalDiasSeleccionados }}</strong></div>
+        <div class="summary-item"><span>Fecha inicial</span><strong>{{ fechaInicialCalculada | date:'dd/MM/yyyy' }}</strong></div>
+        <div class="summary-item"><span>Fecha final</span><strong>{{ fechaFinalCalculada | date:'dd/MM/yyyy' }}</strong></div>
+        <div class="summary-item"><span>Total trabajado</span><strong>{{ totalTrabajadoCalculado | currency:'COP':'symbol-narrow':'1.0-0' }}</strong></div>
+        <div class="summary-item"><span>Total descuentos</span><strong>{{ totalDescuentosCalculado | currency:'COP':'symbol-narrow':'1.0-0' }}</strong></div>
+        <div class="summary-item highlight"><span>Total a pagar</span><strong>{{ totalPagadoCalculado | currency:'COP':'symbol-narrow':'1.0-0' }}</strong></div>
+      </div>
+
+      <div class="form-actions" *ngIf="idTrabajadorSeleccionado">
+        <button class="btn-save" type="button" [disabled]="pagosSeleccionados.length === 0 || procesandoLiquidacion" (click)="liquidar()">
+          {{ procesandoLiquidacion ? 'Procesando...' : 'Realizar liquidación' }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="table-section">
+    <div class="section-heading standalone-heading"><div>
+      <h2>Historial de liquidaciones</h2><p>Las liquidaciones anuladas se conservan para mantener la trazabilidad contable.</p>
+    </div></div>
+    <div class="table-card"><table class="kontagro-table wide-table">
+      <thead><tr><th>Trabajador</th><th>Periodo liquidado</th><th>Trabajado</th><th>Descuentos</th><th>Pagado</th><th>Fecha liquidación</th><th>Estado</th><th class="col-actions">Acciones</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let liquidacion of liquidacionesVisibles">
+          <td>{{ obtenerNombreTrabajador(liquidacion.idTrabajador) }}</td>
+          <td>{{ liquidacion.fechaInicialPagado | date:'dd/MM/yyyy' }} - {{ liquidacion.fechaFinalPagado | date:'dd/MM/yyyy' }}</td>
+          <td>{{ liquidacion.valorTotalTrabajado | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+          <td>{{ liquidacion.valorTotalDescuentos | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+          <td class="text-success">{{ liquidacion.valorTotalPagado | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+          <td>{{ liquidacion.fechaLiquidacion | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td><span class="status-badge paid" [class.cancelled]="liquidacion.estado === 'ANULADA'">{{ liquidacion.estado === 'ANULADA' ? 'Anulada' : 'Activa' }}</span></td>
+          <td class="col-actions"><div class="action-group">
+            <button type="button" class="icon-button" title="Ver pagos de la liquidación" (click)="verDetalle(liquidacion)"><app-ui-icon name="view"></app-ui-icon></button>
+            <button *ngIf="liquidacion.estado !== 'ANULADA'" type="button" class="icon-button danger" [disabled]="!liquidacion.anulable"
+                    [attr.title]="liquidacion.anulable ? 'Anular liquidación' : 'Liquidación histórica sin detalle automático para anular'" (click)="anular(liquidacion)"><app-ui-icon name="cancel"></app-ui-icon></button>
+          </div></td>
+        </tr>
+        <tr *ngIf="listaLiquidaciones.length === 0"><td colspan="8" class="empty-message">No hay liquidaciones registradas.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <app-paginacion [paginaActual]="paginaActual" [totalPaginas]="totalPaginas" [totalRegistros]="listaLiquidaciones.length" [tamanoPagina]="registrosPorPagina" (cambiar)="cambiarPagina($event)"></app-paginacion>
+
+  <section *ngIf="idLiquidacionDetalle" class="detail-section">
+    <div class="table-card detail-card">
+      <div class="detail-header"><div>
+        <h3>Tareas incluidas en la liquidación #{{ idLiquidacionDetalle }}</h3>
+        <p>El nombre de cada tarea y sus valores quedan guardados como snapshot histórico.</p>
+      </div><button type="button" class="icon-button" title="Cerrar detalle" (click)="cerrarDetalle()"><app-ui-icon name="cancel"></app-ui-icon></button></div>
+
+      <table class="kontagro-table">
+        <thead><tr><th>Tarea</th><th>Días trabajados</th><th>Periodo calculado</th><th>Valor a pagar</th><th>Descuentos</th><th>Neto</th><th>Observaciones</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let pago of pagosDetalle">
+            <td>{{ obtenerNombreTarea(pago.idTarea, pago.nombreTarea) }}</td>
+            <td class="cell-observations">{{ obtenerDiasPago(pago) }}</td>
+            <td>{{ pago.fechaInicial | date:'dd/MM/yyyy' }} - {{ pago.fechaFinal | date:'dd/MM/yyyy' }}</td>
+            <td><ng-container *ngIf="pago.valorPagar != null; else detalleSinValor">{{ pago.valorPagar | currency:'COP':'symbol-narrow':'1.0-0' }}</ng-container><ng-template #detalleSinValor>-</ng-template></td>
+            <td>{{ pago.valorDescuentos | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+            <td>{{ obtenerNetoPago(pago) | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+            <td class="cell-observations">{{ pago.observaciones || '-' }}</td>
+          </tr>
+          <tr *ngIf="pagosDetalle.length === 0"><td colspan="7" class="empty-message">No hay detalle de pagos para esta liquidación.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

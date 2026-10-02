@@ -1,0 +1,60 @@
+<div class="gestion-container">
+  <section class="form-section">
+    <div class="form-card">
+      <div class="section-heading">
+        <div>
+          <h2>{{ esEdicion ? 'Editar Tarea' : 'Nueva Tarea' }}</h2>
+          <p>Defina tareas reutilizables como recolección, poda, fumigación o deshierbe. La fecha se registra cuando la tarea se asigna en Pagos.</p>
+        </div>
+      </div>
+
+      <div class="grid-form">
+        <div class="field">
+          <label for="nombreTarea">Nombre de la tarea</label>
+          <input id="nombreTarea" type="text" maxlength="120" autocomplete="off"
+                 [(ngModel)]="tareaSeleccionada.nombre" placeholder="Ej. Recolección de café">
+        </div>
+        <div class="field field-span-2">
+          <label for="descripcionTarea">Descripción</label>
+          <textarea id="descripcionTarea" maxlength="255" [(ngModel)]="tareaSeleccionada.descripcion"
+                    placeholder="Descripción opcional de la labor"></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-save" (click)="guardar()">{{ esEdicion ? 'Actualizar' : 'Guardar' }}</button>
+        <button *ngIf="esEdicion" type="button" class="btn-cancel" (click)="limpiarFormulario()">Cancelar</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="table-section">
+    <div class="table-card">
+      <table class="kontagro-table">
+        <thead>
+          <tr><th>Tarea</th><th>Descripción</th><th>Estado</th><th class="col-actions">Acciones</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let tarea of tareasVisibles">
+            <td class="cell-truncated"><app-texto-truncado [texto]="tarea.nombre"></app-texto-truncado></td>
+            <td class="cell-observations cell-truncated"><app-texto-truncado [texto]="tarea.descripcion"></app-texto-truncado></td>
+            <td><span class="status-badge" [class.paid]="tarea.activo" [class.cancelled]="!tarea.activo">{{ tarea.activo ? 'Activa' : 'Inactiva' }}</span></td>
+            <td class="col-actions">
+              <div class="action-group">
+                <button type="button" class="icon-button" title="Editar tarea" (click)="prepararEdicion(tarea)"><app-ui-icon name="edit"></app-ui-icon></button>
+                <button type="button" class="icon-button" [title]="tarea.activo ? 'Desactivar tarea' : 'Activar tarea'" (click)="cambiarEstado(tarea)">
+                  <app-ui-icon [name]="tarea.activo ? 'cancel' : 'activate'"></app-ui-icon>
+                </button>
+                <button type="button" class="icon-button danger" title="Eliminar tarea" (click)="eliminar(tarea)"><app-ui-icon name="delete"></app-ui-icon></button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="listaTareas.length === 0"><td colspan="4" class="empty-message">No hay tareas registradas.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <app-paginacion [paginaActual]="paginaActual" [totalPaginas]="totalPaginas" [totalRegistros]="listaTareas.length"
+                  [tamanoPagina]="registrosPorPagina" (cambiar)="cambiarPagina($event)"></app-paginacion>
+</div>

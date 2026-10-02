@@ -1,0 +1,235 @@
+<div class="gestion-container">
+  <section class="form-section">
+    <div class="form-card">
+      <div class="section-heading">
+        <div>
+          <h2>{{ esEdicion ? 'Editar Pago a Trabajador' : 'Registrar Pago a Trabajador' }}</h2>
+          <p>Asigne una tarea y registre los días realmente laborados, de forma individual o por rango. El estado cambia a Pagado al liquidar la nómina.</p>
+        </div>
+      </div>
+
+      <div class="grid-form">
+        <div class="field">
+          <label for="trabajadorPago">Trabajador</label>
+          <select id="trabajadorPago" [(ngModel)]="pagoSeleccionado.idTrabajador" [disabled]="guardando">
+            <option [ngValue]="null" disabled>Seleccione un trabajador</option>
+            <option *ngFor="let trabajador of listaTrabajadores" [ngValue]="trabajador.id">{{ trabajador.nombre }}</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="tareaPago">Tarea</label>
+          <select id="tareaPago" [(ngModel)]="pagoSeleccionado.idTarea" [disabled]="guardando">
+            <option [ngValue]="null" disabled>Seleccione una tarea</option>
+            <option *ngFor="let tarea of listaTareas" [ngValue]="tarea.id" [disabled]="!tarea.activo && tarea.id !== pagoSeleccionado.idTarea">
+              {{ tarea.nombre }}{{ tarea.activo ? '' : ' (Inactiva)' }}
+            </option>
+          </select>
+        </div>
+
+        <div class="field field-span-2 workdays-field">
+          <div class="workdays-heading">
+            <div>
+              <label>Días trabajados</label>
+              <small class="field-help">Puede agregar fechas sueltas, rangos consecutivos o combinar ambas opciones.</small>
+            </div>
+            <span class="selected-days-count" *ngIf="pagoSeleccionado.diasTrabajados.length">
+              {{ resumenDias(pagoSeleccionado.diasTrabajados) }} seleccionados
+            </span>
+          </div>
+
+          <div class="workdays-selector">
+            <div class="workdays-option">
+              <span class="workdays-option-title">Agregar un día</span>
+              <div class="date-add-row">
+                <input
+                  id="diaTrabajadoPago"
+                  type="date"
+                  [max]="fechaMaximaDiaTrabajado"
+                  [(ngModel)]="pagoSeleccionado.diaAAgregar"
+                  [disabled]="guardando">
+                <button class="btn-secondary" type="button" (click)="agregarDiaTrabajado()" [disabled]="guardando">
+                  Agregar día
+                </button>
+              </div>
+            </div>
+
+            <div class="workdays-option">
+              <span class="workdays-option-title">Agregar por rango de fechas</span>
+              <div class="date-range-row">
+                <div class="compact-date-field">
+                  <label for="rangoDesdePago">Desde</label>
+                  <input
+                    id="rangoDesdePago"
+                    type="date"
+                    [max]="fechaMaximaDiaTrabajado"
+                    [(ngModel)]="pagoSeleccionado.rangoDesde"
+                    [disabled]="guardando">
+                </div>
+                <div class="compact-date-field">
+                  <label for="rangoHastaPago">Hasta</label>
+                  <input
+                    id="rangoHastaPago"
+                    type="date"
+                    [max]="fechaMaximaDiaTrabajado"
+                    [(ngModel)]="pagoSeleccionado.rangoHasta"
+                    [disabled]="guardando">
+                </div>
+                <button class="btn-secondary" type="button" (click)="agregarRangoTrabajado()" [disabled]="guardando">
+                  Agregar rango
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="date-chip-list" *ngIf="pagoSeleccionado.diasTrabajados.length > 0">
+            <span class="date-chip" *ngFor="let dia of pagoSeleccionado.diasTrabajados" [title]="formatearDiaLargo(dia)">
+              {{ formatearDia(dia) }}
+              <button
+                type="button"
+                [attr.aria-label]="'Quitar ' + formatearDiaLargo(dia)"
+                [disabled]="guardando"
+                (click)="quitarDiaTrabajado(dia)">×</button>
+            </span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="valorPagar">Valor a pagar</label>
+          <input
+            id="valorPagar"
+            type="number"
+            min="1"
+            step="1000"
+            inputmode="decimal"
+            [(ngModel)]="pagoSeleccionado.valorPagar"
+            [disabled]="guardando"
+            placeholder="Ingrese el valor">
+        </div>
+
+        <div class="field">
+          <label for="valorDescuentosPago">Descuentos</label>
+          <input
+            id="valorDescuentosPago"
+            type="number"
+            min="0"
+            step="1000"
+            inputmode="decimal"
+            [(ngModel)]="pagoSeleccionado.valorDescuentos"
+            [disabled]="guardando"
+            placeholder="Sin descuentos">
+        </div>
+
+        <div class="field field-span-2">
+          <label for="observacionesPago">Observaciones</label>
+          <textarea
+            id="observacionesPago"
+            [(ngModel)]="pagoSeleccionado.observaciones"
+            maxlength="255"
+            [disabled]="guardando"
+            placeholder="Observaciones opcionales sobre el periodo o descuentos"></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-save" type="button" (click)="guardar()" [disabled]="guardando">
+          {{ guardando ? (esEdicion ? 'Actualizando...' : 'Guardando...') : (esEdicion ? 'Actualizar' : 'Guardar') }}
+        </button>
+        <button *ngIf="esEdicion" class="btn-cancel" type="button" (click)="limpiarFormulario()" [disabled]="guardando">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="table-section">
+    <div class="table-card">
+      <table class="kontagro-table wide-table payments-table">
+        <thead>
+          <tr>
+            <th>Trabajador</th>
+            <th>Tarea</th>
+            <th>Días trabajados</th>
+            <th>Valor a pagar</th>
+            <th>Descuentos</th>
+            <th>Neto</th>
+            <th>Observaciones</th>
+            <th>Estado</th>
+            <th class="col-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let pago of pagosVisibles">
+            <td class="cell-truncated">
+              <app-texto-truncado [texto]="obtenerNombreTrabajador(pago.idTrabajador)"></app-texto-truncado>
+            </td>
+            <td class="cell-truncated">
+              <app-texto-truncado [texto]="obtenerNombreTarea(pago.idTarea, pago.nombreTarea)"></app-texto-truncado>
+            </td>
+            <td class="days-cell">
+              <app-texto-truncado
+                [texto]="resumenDias(pago.diasTrabajados)"
+                [detalle]="formatearDiasLargos(pago.diasTrabajados)">
+              </app-texto-truncado>
+            </td>
+            <td>
+              <ng-container *ngIf="pago.valorPagar != null; else valorPendiente">
+                {{ pago.valorPagar | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </ng-container>
+              <ng-template #valorPendiente><span class="text-warning">Por definir</span></ng-template>
+            </td>
+            <td>{{ pago.valorDescuentos | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+            <td>
+              <ng-container *ngIf="pago.valorPagar != null; else netoPendiente">
+                {{ obtenerValorNeto(pago) | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </ng-container>
+              <ng-template #netoPendiente>-</ng-template>
+            </td>
+            <td class="cell-observations cell-truncated">
+              <app-texto-truncado [texto]="pago.observaciones"></app-texto-truncado>
+            </td>
+            <td>
+              <span class="status-badge" [class.paid]="pago.estado === 'PAGADO'">
+                {{ pago.estado === 'PAGADO' ? 'Pagado' : 'Pendiente' }}
+              </span>
+            </td>
+            <td class="col-actions">
+              <div class="action-group">
+                <button
+                  type="button"
+                  class="icon-button"
+                  title="Editar pago"
+                  [disabled]="guardando || pago.estado === 'PAGADO'"
+                  (click)="prepararEdicion(pago)">
+                  <app-ui-icon name="edit"></app-ui-icon>
+                </button>
+                <button
+                  type="button"
+                  class="icon-button danger"
+                  [disabled]="guardando || eliminandoId !== null || pago.estado === 'PAGADO' || pago.tieneHistorialNomina"
+                  [attr.title]="pago.tieneHistorialNomina ? 'No se puede eliminar: hace parte del historial de nómina' : 'Eliminar pago'"
+                  (click)="eliminar(pago)">
+                  <app-ui-icon name="delete"></app-ui-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="cargandoPagos">
+            <td colspan="9" class="empty-message">Cargando pagos...</td>
+          </tr>
+          <tr *ngIf="!cargandoPagos && listaPagos.length === 0">
+            <td colspan="9" class="empty-message">No hay pagos registrados.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <app-paginacion
+    [paginaActual]="paginaActual"
+    [totalPaginas]="totalPaginas"
+    [totalRegistros]="listaPagos.length"
+    [tamanoPagina]="registrosPorPagina"
+    (cambiar)="cambiarPagina($event)">
+  </app-paginacion>
+</div>
